@@ -1,0 +1,76 @@
+# Arquitetura
+
+## Padrão adotado: Datapath + Controladora + Sinalizador
+
+Segundo o primeiro áudio explicativo, o projeto segue o mesmo padrão de um exercício de
+aula anterior, dividido em três camadas:
+
+- **Datapath** — os componentes que efetivamente processam e carregam o dado (os 5
+  componentes listados abaixo).
+- **Controladora** — a máquina de estados que orquestra o datapath (pasta `maquina/Controladora/`,
+  arquivo `Projeto_v10.vhd` — ainda um rascunho, ver pendências).
+- **Sinalizador** — pasta `maquina/Sinalizador/` existe mas está vazia (`.gitkeep`). O papel exato
+  não foi detalhado nos áudios além de ser citado como uma das três camadas; pelo nome,
+  presume-se que seja responsável por algum tipo de sinalização/feedback (ex.: indicar ao
+  usuário que um toque foi registrado, ou que o circuito está pronto para o próximo
+  símbolo). **Isso é uma inferência, não uma confirmação** — validar com a equipe.
+
+## Os 5 componentes do Datapath
+
+Conforme descrito no primeiro áudio ("até agora a gente tem um timer, um conversor, um
+assembler, um tradutor e um display"):
+
+| # | Componente (áudio) | Pasta/arquivo no repo | Status |
+|---|---|---|---|
+| 1 | Timer | `maquina/datapath/Timer/` (só `gitkeep.txt`) | ❌ Não implementado |
+| 2 | Conversor | `maquina/datapath/Conversor/Conversor.vhd` | ✅ Implementado (com bug — ver pendências) |
+| 3 | Assembler | `maquina/datapath/Assembler/Assembler.vhd` | 🟡 Implementado parcialmente (falta zero-padding e campo de tamanho) |
+| 4 | Tradutor | `maquina/datapath/Tradutor/` (só `.gitkeep.txt`) | ❌ Não implementado |
+| 5 | Display | `maquina/datapath/BCD_7seg/BCD_7seg.vhd` | ✅ Implementado (decodifica código ordinal → 7 segmentos) |
+
+Além desses 5, existem dois componentes extras no repositório:
+
+| Componente | Pasta/arquivo | Papel |
+|---|---|---|
+| Registrador genérico | `maquina/Reg_W/RegW.vhd` (entidade `RegistradorGenerico`) | Registrador parametrizável (largura `W`), com testbench. Ainda não instanciado em nenhum outro módulo — parece ser um bloco reutilizável para uso futuro. |
+| Controladora (rascunho) | `maquina/Controladora/Projeto_v10.vhd` | Máquina de estados de 4 estados (`s0`..`s3`), incompleta — **não compila** no estado atual. |
+
+## Diagrama de fluxo (planejado, conforme áudio)
+
+```mermaid
+flowchart LR
+    Botao["Botão (sinal `a`)"] --> Timer
+    Timer -- "flag_timer: 0=ponto / 1=traço" --> Conversor
+    Botao --> Conversor
+    Conversor -- "load_assembler, result (bit)" --> Assembler
+    Assembler -- "vetor de 6 bits + comprimento\n(record: value + length)" --> Tradutor
+    Tradutor -- "código da letra" --> Display["Display (BCD_7seg)"]
+
+    Controladora -. "orquestra / sincroniza" .-> Timer
+    Controladora -. orquestra .-> Conversor
+    Controladora -. orquestra .-> Assembler
+    Controladora -. orquestra .-> Tradutor
+    Sinalizador -. "papel ainda não detalhado" .-> Controladora
+```
+
+> As setas do `Controladora` e o papel do `Sinalizador` são inferências baseadas no
+> padrão "Datapath + Controladora + Sinalizador" descrito em áudio — as conexões
+> exatas (quem instancia quem, quais sinais de controle existem) ainda não existem
+> no código e precisam ser confirmadas/definidas pela equipe. O diagrama do datapath
+> desenhado à mão pelo autor (mencionado no segundo áudio) ainda não foi adicionado
+> ao repositório.
+
+## Por que o `Tradutor` e o `Display` parecem redundantes
+
+O `BCD_7seg.vhd` já decodifica uma entrada de 6 bits para o padrão de 7 segmentos — mas
+essa entrada de 6 bits é um **código ordinal sequencial** (`"000000"`=0, `"000001"`=1, ...,
+`"001010"`=A, ... `"100011"`=Z), **não** o padrão de pontos/traços do Morse.
+
+Ou seja, o `Tradutor` (ainda não implementado) é quem precisa:
+1. Receber o par `(valor Morse de 6 bits, comprimento)` vindo do `Assembler`;
+2. Decidir qual letra esse padrão Morse representa;
+3. Converter essa letra para o código ordinal de 6 bits que o `BCD_7seg` já sabe
+   decodificar.
+
+Essa separação de responsabilidades é consistente com o padrão Datapath descrito, mas
+só funciona quando o `Tradutor` existir.

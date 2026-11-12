@@ -1,0 +1,20 @@
+# Artefatos gerados pelo Quartus (recompilação regenera tudo isso)
+db/
+incremental_db/
+output_files/
+greybox_tmp/
+*.qws
+*.rpt
+*.summary
+*.smsg
+*.sld
+*.sopcinfo
+*.done
+*.jdi
+*.pin
+
+# ModelSim / simulação
+*.vcd
+work/
+transcript
+vsim.wlf
