@@ -25,6 +25,7 @@ claramente o que **já está implementado** e o que é **planejado / pendente**.
 | [`03-fluxo-funcional.md`](./03-fluxo-funcional.md) | Passo a passo do sinal do botão até a letra no display, módulo por módulo |
 | [`04-decisoes-e-pendencias.md`](./04-decisoes-e-pendencias.md) | Decisões já tomadas, perguntas em aberto, bugs conhecidos e roadmap |
 | [`05-melhorias.md`](./05-melhorias.md) | Análise de código: bugs, riscos em hardware real, design, estilo, testes e organização do repositório — com sugestões de correção |
+| [`06-testbenches.md`](./06-testbenches.md) | Convenção seguida pelos testbenches, explicação de `assert`/`severity`, padrão tabela-driven do `tb_BCD_7seg`, como rodar no Questa |
 
 ## Status rápido (2026-11-12)
 
