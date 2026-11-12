@@ -1,13 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
--- A entidade de um testbench é sempre vazia, pois ela apenas injeta sinais internos
 entity tb_RegistradorGenerico is
 end tb_RegistradorGenerico;
 
 architecture sim of tb_RegistradorGenerico is
 
-    -- 1. Declaração do componente a ser testado (DUT - Device Under Test)
     component RegistradorGenerico is
         generic (
             W : integer := 8
@@ -57,28 +55,35 @@ begin
         wait for 12 ns;
         tb_Reset <= '0'; -- Libera o registrador para funcionar
         wait for 10 ns;
+        assert tb_Q = "0000" report "Falha no Caso A: reset nao zerou Q" severity error;
 
         -- Caso B: Testar a carga de dados (Load ativo)
         tb_D <= "1010";
         tb_Load <= '1';
         wait for 10 ns; -- Tempo suficiente para a borda de subida do clock capturar os dados
+        assert tb_Q = "1010" report "Falha no Caso B: load nao carregou 1010" severity error;
 
         -- Caso C: Testar retenção (Load inativo)
         -- O registrador deve manter "1010" na saída Q, mesmo mudando a entrada D
         tb_Load <= '0';
         tb_D <= "0011";
         wait for 20 ns;
+        assert tb_Q = "1010" report "Falha no Caso C: Q nao reteve o valor com Load inativo" severity error;
 
         -- Caso D: Nova carga para verificar funcionamento contínuo
         tb_Load <= '1';
         tb_D <= "1111";
         wait for 10 ns;
-        
+        assert tb_Q = "1111" report "Falha no Caso D: nova carga nao funcionou" severity error;
+
         -- Caso E: Teste de Reset interrompendo uma operação
         tb_Reset <= '1';
         wait for 10 ns;
+        assert tb_Q = "0000" report "Falha no Caso E: reset nao interrompeu a operacao" severity error;
         tb_Reset <= '0';
-        
+
+        report "tb_RegistradorGenerico: todos os casos passaram" severity note;
+
         -- Interrompe a execução dos estímulos
         wait;
     end process;
