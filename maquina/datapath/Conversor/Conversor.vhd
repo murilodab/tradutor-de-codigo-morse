@@ -34,13 +34,13 @@ begin
 		elsif rising_edge(clock) then
 		
 			load_assembler <= '0';
-			
-			if prev_a = '1' and a = '0' then-- foi pressionado no ultimo clock	
+			result <= '0';
+
+			if prev_a = '1' and a = '0' then-- foi pressionado no ultimo clock
 					load_assembler <= '1';
 					result <= flag_timer;
 			end if;
 			prev_a <= a;
-			result <= '0';
 		end if;
 	end process;
 end rtl;
