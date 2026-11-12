@@ -31,7 +31,9 @@ Arquivo: `maquina/datapath/Conversor/Conversor.vhd`.
 
 Detecta a **borda de descida** do botão (`prev_a = '1' and a = '0'`, ou seja, quando o botão deixa de ser pressionado:
 - Ativa `load_assembler <= '1'` por um ciclo;
-- Deveria propagar `result <= flag_timer` (o bit ponto/traço medido pelo Timer).
+- Propaga `result <= flag_timer` (o bit ponto/traço medido pelo Timer) — corrigido; antes
+  um `result <= '0';` incondicional no fim do processo sobrescrevia esse valor no mesmo
+  ciclo (ver [`04-decisoes-e-pendencias.md`](./04-decisoes-e-pendencias.md)).
 
 
 ## 4. Assembler 
@@ -88,18 +90,17 @@ complexo do que o `BCD_7seg` atual. Também muda o que o `Tradutor` precisa gera
 
 ## 8. Controladora 
 
-Arquivo: `maquina/Controladora/Controladora.vhd`. Uma máquina de estados simples (`s0`..`s3`) pensada para orquestrar o datapath, mas:
-- O `case` de próximo estado não tem ramo para `s3` (estado nunca alcançado por
-  nenhuma transição, e a ausência do `when s3 =>` deixa o `case` incompleto);
-- Dentro do ramo `when s2 =>` há um `end if;` sem `if` correspondente.
-
-Esse arquivo não compila no estado atual — é claramente um ponto de partida que ainda
-precisa ser retrabalhado antes de orquestrar os componentes reais.
+Arquivo: `maquina/Controladora/Controladora.vhd`. Uma máquina de estados simples (`s0`..`s3`) pensada para orquestrar o datapath. O `case` de próximo estado já cobre os 4
+estados (`s2 → s3 → s0` foi adicionado só para fechar a sintaxe) e compila, mas é
+claramente um ponto de partida que ainda precisa ser retrabalhado antes de orquestrar
+os componentes reais — o papel de cada estado e dos sinais `a`/`b` no fluxo completo do
+datapath ainda não está definido.
 
 ## Componente auxiliar: `RegW` / `RegistradorGenerico`
 
 Não faz parte dos 5 componentes citados, mas existe no repositório
 (`maquina/Reg_W/RegW.vhd`) como um registrador genérico parametrizável (`generic W : integer`),
-com reset assíncrono ativo em **baixo** (`Reset = '0'`) e `Load` síncrono. Tem testbench
+com reset assíncrono ativo em **alto** (`Reset = '1'`, padronizado com os demais módulos)
+e `Load` síncrono. Tem testbench
 (`testbench/Reg_W/tb_RegW.vhd`) cobrindo reset, carga e retenção. Ainda não é instanciado em nenhum
 outro componente — é um bloco reutilizável disponível para quando for necessário..

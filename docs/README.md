@@ -29,8 +29,9 @@ claramente o que **já está implementado** e o que é **planejado / pendente**.
 ## Status rápido (2026-11-10)
 
 ```
-Implementado (parcial ou completo): Conversor, Assembler, BCD_7seg, RegW (genérico)
-Rascunho / não compila:             Controladora (Projeto_v10.vhd)
+Implementado (parcial ou completo): Conversor, Assembler, BCD_7seg, RegW (genérico),
+                                     Controladora (compila, mas ainda não orquestra
+                                     o datapath real)
 Não iniciado (apenas pasta vazia):  Timer, Tradutor, Datapath, Sinalizador
 ```
 
