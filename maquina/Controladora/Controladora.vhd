@@ -4,7 +4,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity Projeto_v10 is
+entity Controladora is
 
 	port(
 		clk		 : in	std_logic;
@@ -16,7 +16,7 @@ entity Projeto_v10 is
 
 end entity;
 
-architecture rtl of Projeto_v10 is
+architecture rtl of Controladora is
 
 	-- Build an enumerated type for the state machine
 	type state_type is (s0, s1, s2, s3);

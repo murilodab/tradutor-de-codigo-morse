@@ -12,7 +12,7 @@ exibe em um display de 7 segmentos.
 
 ## Contexto
 
-- Comentário no topo de `maquina/Controladora/Projeto_v10.vhd`: *"Projeto Final LSD V1.0"* —
+- Comentário no topo de `maquina/Controladora/Controladora.vhd`: *"Projeto Final LSD V1.0"* —
   indica que é um projeto final de disciplina (Lógica/Laboratório de Sistemas Digitais).
 - O padrão de arquitetura (Datapath + Controladora + Sinalizador) foi reaproveitado de
   um projeto anterior de uma aula, segundo o autor em áudios explicativos enviados à

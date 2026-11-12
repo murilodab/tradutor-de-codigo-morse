@@ -8,7 +8,7 @@ aula anterior, dividido em três camadas:
 - **Datapath** — os componentes que efetivamente processam e carregam o dado (os 5
   componentes listados abaixo).
 - **Controladora** — a máquina de estados que orquestra o datapath (pasta `maquina/Controladora/`,
-  arquivo `Projeto_v10.vhd` — ainda um rascunho, ver pendências).
+  arquivo `Controladora.vhd` — ainda um rascunho, ver pendências).
 - **Sinalizador** — pasta `maquina/Sinalizador/` existe mas está vazia (`.gitkeep`). O papel exato
   não foi detalhado nos áudios além de ser citado como uma das três camadas; pelo nome,
   presume-se que seja responsável por algum tipo de sinalização/feedback (ex.: indicar ao
@@ -26,14 +26,16 @@ assembler, um tradutor e um display"):
 | 2 | Conversor | `maquina/datapath/Conversor/Conversor.vhd` | ✅ Implementado (com bug — ver pendências) |
 | 3 | Assembler | `maquina/datapath/Assembler/Assembler.vhd` | 🟡 Implementado parcialmente (falta zero-padding e campo de tamanho) |
 | 4 | Tradutor | `maquina/datapath/Tradutor/` (só `.gitkeep.txt`) | ❌ Não implementado |
-| 5 | Display | `maquina/datapath/BCD_7seg/BCD_7seg.vhd` | ✅ Implementado (decodifica código ordinal → 7 segmentos) |
+| 5 | Display | `maquina/datapath/BCD_7seg/BCD_7seg.vhd` (opção 7 segmentos) | ✅ 7 segmentos implementado · ❌ LCD 16x2 não implementado |
+
+> 📺 **Display tem duas opções de hardware em aberto — ver seção dedicada abaixo.**
 
 Além desses 5, existem dois componentes extras no repositório:
 
 | Componente | Pasta/arquivo | Papel |
 |---|---|---|
 | Registrador genérico | `maquina/Reg_W/RegW.vhd` (entidade `RegistradorGenerico`) | Registrador parametrizável (largura `W`), com testbench. Ainda não instanciado em nenhum outro módulo — parece ser um bloco reutilizável para uso futuro. |
-| Controladora (rascunho) | `maquina/Controladora/Projeto_v10.vhd` | Máquina de estados de 4 estados (`s0`..`s3`), incompleta — **não compila** no estado atual. |
+| Controladora (rascunho) | `maquina/Controladora/Controladora.vhd` | Máquina de estados de 4 estados (`s0`..`s3`), incompleta — **não compila** no estado atual. |
 
 ## Diagrama de fluxo (planejado, conforme áudio)
 
@@ -44,7 +46,7 @@ flowchart LR
     Botao --> Conversor
     Conversor -- "load_assembler, result (bit)" --> Assembler
     Assembler -- "vetor de 6 bits + comprimento\n(record: value + length)" --> Tradutor
-    Tradutor -- "código da letra" --> Display["Display (BCD_7seg)"]
+    Tradutor -- "código da letra" --> Display["Display\n(7 segmentos ou LCD 16x2)"]
 
     Controladora -. "orquestra / sincroniza" .-> Timer
     Controladora -. orquestra .-> Conversor
@@ -60,7 +62,31 @@ flowchart LR
 > desenhado à mão pelo autor (mencionado no segundo áudio) ainda não foi adicionado
 > ao repositório.
 
-## Por que o `Tradutor` e o `Display` parecem redundantes
+## Display: 7 segmentos ou LCD 16x2
+
+A etapa final (mostrar a letra decodificada) tem duas opções de hardware possíveis,
+com implicações bem diferentes de complexidade:
+
+| | 7 segmentos (`BCD_7seg.vhd`) | LCD 16x2 |
+|---|---|---|
+| Status | ✅ Implementado | ❌ Não implementado |
+| O que mostra | 1 caractere por vez (dígito ou aproximação de letra) | Texto real, várias letras em sequência (2 linhas x 16 colunas) |
+| Interface elétrica | Combinacional simples: 6 bits de entrada → 7 bits de saída (`with select`) | Controlador tipo HD44780 — barramento de dados (4 ou 8 bits) + sinais de controle `RS`, `RW`, `E`, exige sequência de inicialização e temporização entre escritas |
+| Esforço para implementar | Já pronto | Novo componente do zero: máquina de estados para inicializar o LCD, escrever comandos e caracteres, controlar posição do cursor |
+| Limitação conhecida | Várias letras (M, W, X) não têm representação exata em 7 segmentos — o arquivo já assume aproximações (ver comentários no código) | Nenhuma limitação de caractere (ASCII completo), mas usa bem mais pinos da FPGA |
+
+**O que muda no resto do datapath:** com 7 segmentos, o `Tradutor` precisa gerar o
+*código ordinal* de 6 bits que o `BCD_7seg` já sabe decodificar (ver seção abaixo). Com
+LCD 16x2, o `Tradutor` precisaria gerar o **código ASCII** da letra (8 bits), e um novo
+componente (ex.: `LCD_16x2` ou similar, ainda não criado) ficaria responsável pelo
+protocolo do controlador do LCD — um driver bem mais complexo que o `BCD_7seg` atual.
+
+> 🟡 **Decisão em aberto:** ainda não está definido qual das duas opções a equipe vai
+> seguir (ou se as duas serão suportadas, com o `Tradutor` escolhendo o formato de saída
+> conforme o display conectado). Ver
+> [`04-decisoes-e-pendencias.md`](./04-decisoes-e-pendencias.md).
+
+## Por que o `Tradutor` e o `Display` parecem redundantes (caminho 7 segmentos)
 
 O `BCD_7seg.vhd` já decodifica uma entrada de 6 bits para o padrão de 7 segmentos — mas
 essa entrada de 6 bits é um **código ordinal sequencial** (`"000000"`=0, `"000001"`=1, ...,
