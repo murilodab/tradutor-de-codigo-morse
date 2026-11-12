@@ -25,7 +25,7 @@ architecture sim of tb_RegistradorGenerico is
     signal meu_clock: std_logic := '0'; -- Inicialização
     
     -- Sinais internos para estimular o componente (largura de 4 bits para casar com W=4)
-    signal tb_Reset : std_logic := '1'; -- Começa em '1' (inativo, já que é ativo em zero)
+    signal tb_Reset : std_logic := '0'; -- Começa em '0' (inativo, já que é ativo em um)
     signal tb_Load  : std_logic := '0';
     signal tb_D     : std_logic_vector(3 downto 0) := (others => '0');
     signal tb_Q     : std_logic_vector(3 downto 0);
@@ -53,9 +53,9 @@ begin
     process
     begin
         -- Caso A: Pulso de Reset Assíncrono inicial
-        tb_Reset <= '0';
-        wait for 12 ns; 
-        tb_Reset <= '1'; -- Libera o registrador para funcionar
+        tb_Reset <= '1';
+        wait for 12 ns;
+        tb_Reset <= '0'; -- Libera o registrador para funcionar
         wait for 10 ns;
 
         -- Caso B: Testar a carga de dados (Load ativo)
@@ -75,9 +75,9 @@ begin
         wait for 10 ns;
         
         -- Caso E: Teste de Reset interrompendo uma operação
-        tb_Reset <= '0';
-        wait for 10 ns;
         tb_Reset <= '1';
+        wait for 10 ns;
+        tb_Reset <= '0';
         
         -- Interrompe a execução dos estímulos
         wait;

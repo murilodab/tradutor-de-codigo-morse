@@ -20,8 +20,8 @@ begin
     -- O Reset é assíncrono, então ele DEVE estar na lista de sensibilidade junto com o clock
     process(clock, Reset)
     begin
-        -- Prioridade máxima: Reset assíncrono ativo em nível lógico zero ('0')
-        if (Reset = '0') then
+        -- Prioridade máxima: Reset assíncrono ativo em nível lógico um ('1')
+        if (Reset = '1') then
             Q <= (others => '0');
             
         -- Caso não haja Reset, avaliamos o comportamento síncrono na borda de subida
