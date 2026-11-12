@@ -46,8 +46,9 @@ begin
 						state <= s1;
 					end if;
 				when s2=>
-						state <= s1;
-					end if;
+						state <= s3;
+				when s3=>
+						state <= s0;
 			end case;
 		end if;
 	end process;
