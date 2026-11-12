@@ -26,12 +26,13 @@ claramente o que **já está implementado** e o que é **planejado / pendente**.
 | [`04-decisoes-e-pendencias.md`](./04-decisoes-e-pendencias.md) | Decisões já tomadas, perguntas em aberto, bugs conhecidos e roadmap |
 | [`05-melhorias.md`](./05-melhorias.md) | Análise de código: bugs, riscos em hardware real, design, estilo, testes e organização do repositório — com sugestões de correção |
 
-## Status rápido (2026-11-10)
+## Status rápido (2026-11-12)
 
 ```
 Implementado (parcial ou completo): Conversor, Assembler, BCD_7seg, RegW (genérico),
                                      Controladora (compila, mas ainda não orquestra
                                      o datapath real)
+Com testbench (0 erros no Questa):  RegW, Conversor, Assembler, BCD_7seg, Controladora
 Não iniciado (apenas pasta vazia):  Timer, Tradutor, Datapath, Sinalizador
 ```
 

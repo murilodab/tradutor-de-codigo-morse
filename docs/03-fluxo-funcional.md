@@ -27,7 +27,8 @@ O `Timer` também deveria:
 
 ## 3. Conversor
 
-Arquivo: `maquina/datapath/Conversor/Conversor.vhd`.
+Arquivo: `maquina/datapath/Conversor/Conversor.vhd`. Testbench em
+`testbench/Conversor/tb_Conversor.vhd`.
 
 Detecta a **borda de descida** do botão (`prev_a = '1' and a = '0'`, ou seja, quando o botão deixa de ser pressionado:
 - Ativa `load_assembler <= '1'` por um ciclo;
@@ -38,7 +39,8 @@ Detecta a **borda de descida** do botão (`prev_a = '1' and a = '0'`, ou seja, q
 
 ## 4. Assembler 
 
-Arquivo: `maquina/datapath/Assembler/Assembler.vhd`.
+Arquivo: `maquina/datapath/Assembler/Assembler.vhd`. Testbench em
+`testbench/Assembler/tb_Assembler.vhd`.
 
 É um registrador de deslocamento: a cada pulso de `Load='1'`, desloca o bit `D` para
 dentro de um vetor de 6 bits (`Q <= data_in(4 downto 0) & D`). Isso acumula até 6
@@ -64,7 +66,9 @@ Pasta `maquina/datapath/Tradutor/` tem apenas um placeholder. Pelo design descri
 
 ### 7a. 7 segmentos (`BCD_7seg`) — ✅ implementado
 
-Arquivo: `maquina/datapath/BCD_7seg/BCD_7seg.vhd`.
+Arquivo: `maquina/datapath/BCD_7seg/BCD_7seg.vhd`. Testbench em
+`testbench/BCD_7seg/tb_BCD_7seg.vhd`, cobrindo as 36 combinações da tabela mais 2 fora
+dela (caminho `when others`).
 
 Recebe um vetor de 6 bits **ordinal** (não é o padrão Morse — é só uma contagem
 binária: `"000000"` a `"001001"` para os dígitos 0–9, `"001010"` em diante para as
@@ -90,7 +94,8 @@ complexo do que o `BCD_7seg` atual. Também muda o que o `Tradutor` precisa gera
 
 ## 8. Controladora 
 
-Arquivo: `maquina/Controladora/Controladora.vhd`. Uma máquina de estados simples (`s0`..`s3`) pensada para orquestrar o datapath. O `case` de próximo estado já cobre os 4
+Arquivo: `maquina/Controladora/Controladora.vhd`. Testbench em
+`testbench/Controladora/tb_Controladora.vhd`. Uma máquina de estados simples (`s0`..`s3`) pensada para orquestrar o datapath. O `case` de próximo estado já cobre os 4
 estados (`s2 → s3 → s0` foi adicionado só para fechar a sintaxe) e compila, mas é
 claramente um ponto de partida que ainda precisa ser retrabalhado antes de orquestrar
 os componentes reais — o papel de cada estado e dos sinais `a`/`b` no fluxo completo do

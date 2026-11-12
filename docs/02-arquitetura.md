@@ -24,10 +24,10 @@ assembler, um tradutor e um display"):
 | # | Componente (áudio) | Pasta/arquivo no repo | Status |
 |---|---|---|---|
 | 1 | Timer | `maquina/datapath/Timer/` (só `gitkeep.txt`) | ❌ Não implementado |
-| 2 | Conversor | `maquina/datapath/Conversor/Conversor.vhd` | ✅ Implementado |
-| 3 | Assembler | `maquina/datapath/Assembler/Assembler.vhd` | 🟡 Implementado parcialmente (falta zero-padding e campo de tamanho) |
+| 2 | Conversor | `maquina/datapath/Conversor/Conversor.vhd` | ✅ Implementado, com testbench (`testbench/Conversor/tb_Conversor.vhd`) |
+| 3 | Assembler | `maquina/datapath/Assembler/Assembler.vhd` | 🟡 Implementado parcialmente (falta zero-padding e campo de tamanho), com testbench (`testbench/Assembler/tb_Assembler.vhd`) |
 | 4 | Tradutor | `maquina/datapath/Tradutor/` (só `.gitkeep.txt`) | ❌ Não implementado |
-| 5 | Display | `maquina/datapath/BCD_7seg/BCD_7seg.vhd` (opção 7 segmentos) | ✅ 7 segmentos implementado · ❌ LCD 16x2 não implementado |
+| 5 | Display | `maquina/datapath/BCD_7seg/BCD_7seg.vhd` (opção 7 segmentos) | ✅ 7 segmentos implementado, com testbench cobrindo toda a tabela (`testbench/BCD_7seg/tb_BCD_7seg.vhd`) · ❌ LCD 16x2 não implementado |
 
 > 📺 **Display tem duas opções de hardware em aberto — ver seção dedicada abaixo.**
 
@@ -36,7 +36,7 @@ Além desses 5, existem dois componentes extras no repositório:
 | Componente | Pasta/arquivo | Papel |
 |---|---|---|
 | Registrador genérico | `maquina/Reg_W/RegW.vhd` (entidade `RegistradorGenerico`) | Registrador parametrizável (largura `W`), com testbench. Reset padronizado como ativo em alto, igual aos demais módulos. Ainda não instanciado em nenhum outro módulo — parece ser um bloco reutilizável para uso futuro. |
-| Controladora (rascunho) | `maquina/Controladora/Controladora.vhd` | Máquina de estados de 4 estados (`s0`..`s3`) — **já compila**, mas a transição `s2 → s3 → s0` é só um fechamento sintático provisório; o papel real de cada estado no fluxo completo do datapath ainda não foi definido. |
+| Controladora (rascunho) | `maquina/Controladora/Controladora.vhd` | Máquina de estados de 4 estados (`s0`..`s3`) — **já compila** e tem testbench (`testbench/Controladora/tb_Controladora.vhd`), mas a transição `s2 → s3 → s0` é só um fechamento sintático provisório; o papel real de cada estado no fluxo completo do datapath ainda não foi definido. |
 
 ## Diagrama de fluxo (planejado, conforme áudio)
 
