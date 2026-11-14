@@ -1,17 +1,13 @@
-Ignore everything by default
+# Ignore everything
+*
 
-Allow all directories so Git can traverse into subdirectories
-
+# Re-enable all subdirectories so Git can scan inside them
 !*/
 
-Allow specific file extensions
-
-!.vhd
-!.txt
-!.md
-!.pdf
-!*.drawio
-
-Always allow the .gitignore file itself
-
+# Re-enable specific file extensions
 !.gitignore
+!*.vhd
+!*.txt
+!*.md
+!*.pdf
+!*.drawio
