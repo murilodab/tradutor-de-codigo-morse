@@ -7,22 +7,28 @@ que os áudios descrevem com o que o código realmente faz hoje.
 
 O usuário pressiona o botão `a` por um tempo curto (ponto) ou longo (traço).
 
-## 2. Timer 
+## 2. Timer — ✅ implementado
 
-**Planejado:** o `Timer` mede a duração do pressionamento e informa ao
-`Conversor` se foi um traço ou um ponto, através de um sinal `flag_timer` (0 ou 1).
+Arquivo: `maquina/datapath/Timer/Timer.vhd`. Testbench em
+`testbench/Timer/tb_Timer.vhd`.
 
-O `Timer` também deveria:
-- Converter os ciclos de clock da placa em milissegundos/segundos.
-- Ter uma entrada **externa e configurável** para o limiar ponto/traço, permitindo
-  ajustar a velocidade exigida do usuário — por exemplo, um iniciante podendo usar
-  ponto ≈ 1s / traço ≈ 3s, enquanto um usuário experiente usa tempos bem menores
-  (< 0.5s). Essa configurabilidade não existe em nenhuma porta de nenhum componente
-  atual — é só uma intenção de design registrada no áudio.
-- Proposta em discussão: discretizar essa configurabilidade em **3 perfis fixos**
-  (Iniciante / Avançado / Expert), selecionáveis externamente em vez de um limiar
-  livre. Ver detalhamento e tabela de valores em
-  [`04-decisoes-e-pendencias.md`](./04-decisoes-e-pendencias.md#perfis-de-velocidade-timer--proposta-em-discussão-2026-11-12).
+O `Timer` mede, em ciclos de clock, por quanto tempo o botão `a` fica pressionado e
+informa ao `Conversor` se foi um traço ou um ponto através do sinal `flag_timer`
+(`'0'` = ponto, `'1'` = traço).
+
+- A conversão de ciclos de clock para segundos é feita pelo generic `CLOCK_FREQ_HZ`
+  (frequência do clock da placa, em Hz), usado para calcular os limiares de cada
+  perfil em número de ciclos.
+- A entrada `profile` (2 bits) seleciona entre os **3 perfis fixos** (Iniciante /
+  Avançado / Expert) definidos em
+  [`04-decisoes-e-pendencias.md`](./04-decisoes-e-pendencias.md#perfis-de-velocidade-timer--proposta-em-discussão-2026-11-12) —
+  a forma final de seleção física (dip switches, por exemplo) ainda é uma pergunta em
+  aberto nesse mesmo documento.
+- Enquanto `a = '1'`, um contador interno incrementa a cada ciclo (saturando no maior
+  limiar, o do perfil Iniciante, para não estourar). A cada ciclo, `flag_timer` é
+  atualizado comparando o contador com o limiar do perfil selecionado. Quando o botão
+  é solto, o contador zera, mas `flag_timer` mantém o último valor calculado — que é
+  exatamente o valor que o `Conversor` lê na borda de descida.
 
 
 ## 3. Conversor

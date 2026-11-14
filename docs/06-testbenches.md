@@ -12,7 +12,8 @@ testbench/
 ├── Conversor/tb_Conversor.vhd
 ├── Assembler/tb_Assembler.vhd
 ├── BCD_7seg/tb_BCD_7seg.vhd
-└── Controladora/tb_Controladora.vhd
+├── Controladora/tb_Controladora.vhd
+└── Timer/tb_Timer.vhd
 ```
 
 Convenção de nomes: entidade `tb_<Componente>`, arquivo `tb_<Componente>.vhd`, na pasta
@@ -142,8 +143,8 @@ que falhar aparece como `Error` com a mensagem do `report` correspondente.
 > ⚠️ A flag `-2008` é necessária para o `to_string` usado em `tb_BCD_7seg.vhd` — sem
 > ela, esse testbench específico não compila.
 
-Os 5 componentes (`Conversor`, `Controladora`, `RegistradorGenerico`, `Assembler`,
-`Bcd_7seg`) também foram verificados no **Quartus** (Análise & Síntese, `quartus_map`),
+Os 6 componentes (`Conversor`, `Controladora`, `RegistradorGenerico`, `Assembler`,
+`Bcd_7seg`, `Timer`) também foram verificados no **Quartus** (Análise & Síntese, `quartus_map`),
 cada um como top-level isolado, contra o dispositivo declarado no README
 (`10M50DAF484C7G`) — 0 erros em todos. Isso é uma verificação complementar à simulação:
 confirma que o código sintetiza para o hardware alvo, mas não substitui o testbench
@@ -158,3 +159,4 @@ confirma que o código sintetiza para o hardware alvo, mas não substitui o test
 | `tb_Assembler.vhd` | Reset; deslocamento bit a bit de uma sequência de 6 bits; retenção com `Load='0'`; reset no meio da sequência |
 | `tb_BCD_7seg.vhd` | As 36 combinações da tabela (dígitos 0–9, letras A–Z) + 2 combinações fora da tabela (`when others`) |
 | `tb_Controladora.vhd` | Reset; as 4 transições de estado (`s0→s1→s2→s3→s0`); permanência em `s0` com `b='0'`; reset interrompendo a FSM |
+| `tb_Timer.vhd` | Reset; toque curto = ponto no perfil Expert; toque longo = traço no perfil Expert; o mesmo toque longo vira ponto no perfil Iniciante (limiar maior); reset interrompendo a medição |

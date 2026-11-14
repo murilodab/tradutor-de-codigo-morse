@@ -12,7 +12,7 @@
 
 | # | Componente | Pasta/arquivo no repo | Status |
 |---|---|---|---|
-| 1 | Timer | `maquina/datapath/Timer/`  | ❌ Não implementado |
+| 1 | Timer | `maquina/datapath/Timer/Timer.vhd` | ✅ Implementado (3 perfis de velocidade), com testbench |
 | 2 | Conversor | `maquina/datapath/Conversor/Conversor.vhd` | ✅ Implementado, com testbench |
 | 3 | Assembler | `maquina/datapath/Assembler/Assembler.vhd` | 🟡 Implementado parcialmente (falta zero-padding e campo de tamanho), com testbench |
 | 4 | Tradutor | `maquina/datapath/Tradutor/`  | ❌ Não implementado |
