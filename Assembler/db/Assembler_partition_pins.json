@@ -1,0 +1,65 @@
+{
+	"partitions" : [
+		{
+			"name" : "Top",
+			"pins" : [
+				{
+					"name" : "Q.length[0]",
+					"strict" : false
+				},
+				{
+					"name" : "Q.length[1]",
+					"strict" : false
+				},
+				{
+					"name" : "Q.length[2]",
+					"strict" : false
+				},
+				{
+					"name" : "Q.value[0]",
+					"strict" : false
+				},
+				{
+					"name" : "Q.value[1]",
+					"strict" : false
+				},
+				{
+					"name" : "Q.value[2]",
+					"strict" : false
+				},
+				{
+					"name" : "Q.value[3]",
+					"strict" : false
+				},
+				{
+					"name" : "Q.value[4]",
+					"strict" : false
+				},
+				{
+					"name" : "Q.value[5]",
+					"strict" : false
+				},
+				{
+					"name" : "load_a",
+					"strict" : false
+				},
+				{
+					"name" : "clock",
+					"strict" : false
+				},
+				{
+					"name" : "reset",
+					"strict" : false
+				},
+				{
+					"name" : "btn_b",
+					"strict" : false
+				},
+				{
+					"name" : "D",
+					"strict" : false
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,118 @@
+m255
+K4
+z2
+!s12c _opt
+Z0 !s99 nomlopt
+!s11e vcom 2025.2 2025.05, May 31 2025
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z1 d/home/murilo/Documentos/UFMG/Quartus/Projeto/Timer/simulation/questa
+T_opt
+!i145 1
+!i144 0
+Z2 !s110 1794663392
+VELEdF6S8Pn8FX>ZAol0XO2
+04 8 3 work timer_tb sim 1
+=1-5c514fae63c5-6af863e0-49db8-107df8
+R0
+!s12f OEM100
+!s12b OEM100
+!s124 OEM10U2 
+!s135 nogc
+o-quiet -auto_acc_if_foreign -work work -L altera -L lpm -L sgate -L altera_mf -L altera_lnsim -L fiftyfivenm -L rtl_work -L work +acc
+tCvgOpt 0
+n@_opt
+OL;O;2025.2;82
+Etimer
+Z3 w1794662456
+Z4 DPx4 ieee 11 numeric_std 0 22 aU^R8eGcicLcUFIaBQSL>3
+Z5 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z6 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
+!i122 0
+R1
+Z7 8/home/murilo/Documentos/UFMG/Quartus/Projeto/Timer/Timer.vhd
+Z8 F/home/murilo/Documentos/UFMG/Quartus/Projeto/Timer/Timer.vhd
+l0
+L8 1
+V3h537HNT`jc;47jhI<[?P1
+!s100 n3AHI7f6CO<J[g[41@_TU2
+Z9 OL;C;2025.2;82
+33
+Z10 !s110 1794663391
+!i10b 1
+Z11 !s108 1794663391.000000
+Z12 !s90 -reportprogress|300|-2008|-work|work|/home/murilo/Documentos/UFMG/Quartus/Projeto/Timer/Timer.vhd|
+Z13 !s107 /home/murilo/Documentos/UFMG/Quartus/Projeto/Timer/Timer.vhd|
+!i113 0
+Z14 o-2008 -work work
+Z15 tExplicit 1 CvgOpt 0
+Artl
+R4
+R5
+R6
+Z16 DEx4 work 5 timer 0 22 3h537HNT`jc;47jhI<[?P1
+!i122 0
+l35
+L25 42
+V52U?6oO`>S>[:CMXgFBgL1
+!s100 7nZ7mFBd<n1bfPj1S;Vde0
+R9
+33
+R10
+!i10b 1
+R11
+R12
+R13
+!i113 0
+R14
+R15
+Etimer_tb
+Z17 w1794662841
+Z18 DPx3 std 3 env 0 22 g[fj8WJKOa<0Y`zWY3UD70
+R4
+R5
+R6
+!i122 1
+R1
+Z19 8/home/murilo/Documentos/UFMG/Quartus/Projeto/Timer/Timer_tb.vhd
+Z20 F/home/murilo/Documentos/UFMG/Quartus/Projeto/Timer/Timer_tb.vhd
+l0
+L6 1
+V^RZYCCi:k^^nV3NT<hAV73
+!s100 X8cdSKPg`L6c;><fL_kb`2
+R9
+33
+R2
+!i10b 1
+R11
+Z21 !s90 -reportprogress|300|-2008|-work|work|/home/murilo/Documentos/UFMG/Quartus/Projeto/Timer/Timer_tb.vhd|
+Z22 !s107 /home/murilo/Documentos/UFMG/Quartus/Projeto/Timer/Timer_tb.vhd|
+!i113 0
+R14
+R15
+Asim
+R16
+R18
+R4
+R5
+R6
+DEx4 work 8 timer_tb 0 22 ^RZYCCi:k^^nV3NT<hAV73
+!i122 1
+l37
+L10 89
+V3MSm<<R0[E3LZJ7[G;BX62
+!s100 N_S7YU`2ge1L>9dAW`kR=3
+R9
+33
+R2
+!i10b 1
+R11
+R21
+R22
+!i113 0
+R14
+R15

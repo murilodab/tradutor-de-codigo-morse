@@ -1,0 +1,149 @@
+{
+	"partitions" : [
+		{
+			"name" : "Top",
+			"pins" : [
+				{
+					"name" : "milissegundos[0]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[1]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[2]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[3]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[4]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[5]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[6]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[7]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[8]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[9]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[10]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[11]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[12]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[13]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[14]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[15]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[16]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[17]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[18]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[19]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[20]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[21]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[22]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[23]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[24]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[25]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[26]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[27]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[28]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[29]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[30]",
+					"strict" : false
+				},
+				{
+					"name" : "milissegundos[31]",
+					"strict" : false
+				},
+				{
+					"name" : "clock",
+					"strict" : false
+				},
+				{
+					"name" : "btn_a",
+					"strict" : false
+				},
+				{
+					"name" : "reset",
+					"strict" : false
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,1 @@
+/home/murilo/altera_lite/25.1std/questa_fse/linux_x86_64/VisualizerRls/bin/viscom -nolock -quiet -jmem_size 16662960 work.Timer_tb -quiet -auto_acc_if_foreign -work work -L altera -L lpm -L sgate -L altera_mf -L altera_lnsim -L fiftyfivenm -L rtl_work -L work +acc -allow_unnamed -o _opt -id 1-5c514fae63c5-6af863e0-49db8-107df8 +__betafsm

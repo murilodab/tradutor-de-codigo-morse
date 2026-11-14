@@ -1,20 +1,17 @@
-# Artefatos gerados pelo Quartus (recompilação regenera tudo isso)
-db/
-incremental_db/
-output_files/
-greybox_tmp/
-*.qws
-*.rpt
-*.summary
-*.smsg
-*.sld
-*.sopcinfo
-*.done
-*.jdi
-*.pin
+Ignore everything by default
 
-# ModelSim / simulação
-*.vcd
-work/
-transcript
-vsim.wlf
+Allow all directories so Git can traverse into subdirectories
+
+!*/
+
+Allow specific file extensions
+
+!.vhd
+!.txt
+!.md
+!.pdf
+!*.drawio
+
+Always allow the .gitignore file itself
+
+!.gitignore

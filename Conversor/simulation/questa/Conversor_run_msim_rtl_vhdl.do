@@ -7,3 +7,11 @@ vmap work rtl_work
 
 vcom -93 -work work {/home/murilo/Documentos/UFMG/Quartus/Projeto/Conversor/Conversor.vhd}
 
+vcom -93 -work work {/home/murilo/Documentos/UFMG/Quartus/Projeto/Conversor/Conversor_tb.vhd}
+
+vsim -t 1ps -L altera -L lpm -L sgate -L altera_mf -L altera_lnsim -L fiftyfivenm -L rtl_work -L work -voptargs="+acc"  Conversor_tb
+
+add wave *
+view structure
+view signals
+run -all
