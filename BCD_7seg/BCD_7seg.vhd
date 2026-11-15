@@ -29,7 +29,6 @@ begin
 	    "0111101" when "001101", --d
 	    "1001111" when "001110", --E
 	    "1000111" when "001111", --f
-		 -- Letras G a Z (Mapeadas a partir de 16 em decimal = "010000")
        "1011110" when "010000", -- G (maiúsculo)
        "0110111" when "010001", -- H (maiúsculo)
        "0000110" when "010010", -- I (usando segmentos e, f à esquerda)

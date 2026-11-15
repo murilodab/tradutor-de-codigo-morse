@@ -7,11 +7,15 @@ use ieee.std_logic_1164.all;
 entity Projeto_v10 is
 
 	port(
-		clk		 : in	std_logic;
-		a	 : in	std_logic;
-		b	 : in	std_logic;
-		reset	 : in	std_logic;
-		output	 : out	std_logic_vector(1 downto 0)
+		clock		  : in	std_logic;
+		reset 	  : in	std_logic;
+		btn_b_flag : in   std_logic;
+		
+		timer_reset 	 : out std_logic;
+		conversor_reset : out std_logic;
+		assembler_reset : out std_logic;
+		tradutor_enable : out std_logic
+		
 	);
 
 end entity;
@@ -19,7 +23,7 @@ end entity;
 architecture rtl of Projeto_v10 is
 
 	-- Build an enumerated type for the state machine
-	type state_type is (s0, s1, s2, s3);
+	type state_type is (s0, s1, s2);
 
 	-- Register to hold the current state
 	signal state   : state_type;
@@ -27,27 +31,22 @@ architecture rtl of Projeto_v10 is
 begin
 
 	-- Logic to advance to the next state
-	process (clk, reset)
+	process (clock, reset)
 	begin
 		if reset = '1' then
 			state <= s0;
-		elsif (rising_edge(clk)) then
+		elsif (rising_edge(clock)) then
 			case state is
 				when s0=>
-					if b = '1' then
 						state <= s1;
-					else
-						state <= s0;
-					end if;
 				when s1=>
-					if b = '1' then
+					if btn_b_flag = '1' then
 						state <= s2;
 					else
 						state <= s1;
 					end if;
 				when s2=>
 						state <= s1;
-					end if;
 			end case;
 		end if;
 	end process;
@@ -57,14 +56,20 @@ begin
 	begin
 		case state is
 			when s0 =>
-				output <= "00";
-			when s1 =>
-				output <= "01";
-			when s2 =>
-				output <= "10";
-			when s3 =>
-				output <= "11";
+				timer_reset <= '1';
+				conversor_reset <= '1';
+				assembler_reset <= '1';
+				tradutor_enable <= '0';
+			when s1=>
+				timer_reset <= '0';
+				conversor_reset <= '0';
+				assembler_reset <= '0';
+				tradutor_enable <= '0';
+			when s2=>
+				timer_reset <= '1';
+				conversor_reset <= '1';
+				assembler_reset <= '1';
+				tradutor_enable <= '1';
 		end case;
 	end process;
-
 end rtl;

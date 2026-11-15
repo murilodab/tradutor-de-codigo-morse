@@ -8,8 +8,9 @@ entity Tradutor is
 
 	port 
 	(
-		clock	        : in std_logic;
+		clock         : in std_logic;
 		morse_data_in : in morse_data;
+		enable        : in std_logic;
 		seven_seg_out : out std_logic_vector (5 downto 0)
 	);
 
@@ -20,6 +21,8 @@ architecture rtl of Tradutor is
 begin
 	process (clock)
 	begin
+	if rising_edge(clock) then
+	    if enable = '1' then
 		case morse_data_in.length is
 			when 1 =>
 				case morse_data_in.value is
@@ -56,7 +59,7 @@ begin
 					when "000111" => seven_seg_out <= "010011"; -- J
 					when "000100" => seven_seg_out <= "010101"; -- L
 					when "000110" => seven_seg_out <= "011001"; -- P
-					when "011010" => seven_seg_out <= "011010"; -- q
+					when "001101" => seven_seg_out <= "011010"; -- q
 					when "000001" => seven_seg_out <= "011111"; -- v
 					when "001001" => seven_seg_out <= "100001"; -- X
 					when "001011" => seven_seg_out <= "100010"; -- y
@@ -83,6 +86,10 @@ begin
 				end case;
 			when others => seven_seg_out <= "111111"; -- .
 		end case;
-	end process;
+	    else
+	    	seven_seg_out <= "111111"; -- .
+	  end if;
+	end if;
+end process;
 
 end rtl;
