@@ -37,7 +37,8 @@ begin
        "1010111" when "010100", -- K (aproximação, similar ao H com barra no topo)
        "0001110" when "010101", -- L (maiúsculo)
        "0010101" when "010110", -- M (impossível num 7-seg, aproxima-se usando 'n' minúsculo)
-       "0010101" when "010111", -- n (minúsculo, c, e, g)        "0011101" when "011000", -- o (minúsculo, c, d, e, g - para diferenciar do zero)
+       "0010101" when "010111", -- n (minúsculo, c, e, g)       
+       "0011101" when "011000", -- o (minúsculo, c, d, e, g - para diferenciar do zero)
        "1100111" when "011001", -- P (maiúsculo)
        "1110011" when "011010", -- q (minúsculo, similar ao 9)
        "0000101" when "011011", -- r (minúsculo, e, g)
@@ -49,6 +50,7 @@ begin
        "0110111" when "100001", -- X (impossível, costuma-se repetir o 'H')
        "0111011" when "100010", -- y (minúsculo)
        "1101101" when "100011", -- Z (igual ao 2)
+       "0000001" when "111111", -- .
        "0000000" when others;   -- Apaga tudo para qualquer outra combinação
 				
 end with_select_bcd7seg;
