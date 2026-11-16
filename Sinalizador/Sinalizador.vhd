@@ -3,6 +3,11 @@ use ieee.std_logic_1164.all;
 
 entity Sinalizador is
 
+generic (
+        clock_frequency : integer := 50000000
+    );
+	
+
 	port(
 	-- inputs
 		clock		: in std_logic;
@@ -30,6 +35,10 @@ architecture structural of Sinalizador is
 	
 
 	I_Datapath : entity work.Datapath
+	
+	generic map (
+            clock_frequency => clock_frequency
+        )	
 
 		port map (
 		btn_a => btn_a,
