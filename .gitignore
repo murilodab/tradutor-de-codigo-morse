@@ -11,3 +11,11 @@
 !*.md
 !*.pdf
 !*.drawio
+
+# Mas artefatos gerados pelo Quartus/Questa continuam fora, mesmo com uma das
+# extensoes acima (sao logs/lixo de compilacao, regeneram a cada build e nao
+# tem o projeto .qpf/.qsf versionado que os gerou)
+**/db/
+**/incremental_db/
+**/output_files/
+**/simulation/
