@@ -17,8 +17,10 @@ architecture sim of tb_Sinalizador is
 	signal reset : std_logic := '0';
 	signal btn_a : std_logic := '0';
 	signal btn_b : std_logic := '0';
-	
-	signal disp_char     : std_logic_vector (6 downto 0);
+	signal sw_profile : std_logic_vector(2 downto 0) := "010"; -- switch Avancado ligado: ponto <= 500 ms, traco <= 1500 ms
+
+	signal disp_char   : std_logic_vector (6 downto 0);
+	signal led_profile : std_logic_vector(2 downto 0);
 	
 	signal fim : boolean := false;
 
@@ -34,7 +36,9 @@ begin
 			reset => reset,
 			btn_a => btn_a,
 			btn_b => btn_b,
-			disp_char => disp_char
+			sw_profile => sw_profile,
+			disp_char => disp_char,
+			led_profile => led_profile
 			);
 			
 
@@ -68,7 +72,10 @@ process
 		wait until rising_edge(clock);
 		reset <= '0';
 		wait for intervalo_aperto;
-		
+
+		report "sw_profile=" & to_string(sw_profile) &
+		       " | led_profile=" & to_string(led_profile);
+
 		while not endfile(morse_input) loop
 			readline(morse_input, linha_in);
 			
