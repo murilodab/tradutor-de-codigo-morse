@@ -15,6 +15,7 @@ architecture sim of Tradutor_tb is
     -- Sinais conectados ao Tradutor
     signal clock         : std_logic := '0';
     signal morse_data_in : morse_data := (value => (others => '0'), length => 0);
+    signal enable         : std_logic := '1';
     signal seven_seg_out : std_logic_vector(5 downto 0);
 
     signal sim_done      : boolean := false;
@@ -44,6 +45,7 @@ begin
         port map (
             clock         => clock,
             morse_data_in => morse_data_in,
+            enable        => enable,
             seven_seg_out => seven_seg_out
         );
 

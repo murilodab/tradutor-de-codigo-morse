@@ -1,117 +1,136 @@
 # Fluxo Funcional
 
-Passo a passo do sinal, do toque no botão até a letra aparecer no display — cruzando o
-que os áudios descrevem com o que o código realmente faz hoje.
+> Atualizado em 2026-11-16. O fluxo abaixo é descrito a partir do `Datapath.vhd` e
+> `Sinalizador.vhd` atuais — todo o datapath está implementado e conectado, não é
+> mais um fluxo "planejado".
 
-## 1. Botão pressionado (`a`)
+Passo a passo do sinal, do toque no botão até a letra aparecer no display.
 
-O usuário pressiona o botão `a` por um tempo curto (ponto) ou longo (traço).
+## 0. Topo: `Sinalizador` + `Controladora`
 
-## 2. Timer — ✅ implementado
+Arquivos: `Sinalizador/Sinalizador.vhd`, `Controladora/Projeto_v10.vhd`.
 
-Arquivo: `maquina/datapath/Timer/Timer.vhd`. Testbench em
-`testbench/Timer/tb_Timer.vhd`.
+O `Sinalizador` é o topo do projeto: instancia `Datapath` e `Controladora`
+(`Projeto_v10`) e fecha o laço de controle entre os dois. A `Controladora` é uma FSM
+de 3 estados que controla quando o datapath pode acumular símbolos (`s1`) e quando
+deve ser limpo/liberar o `Tradutor` (`s0` e `s2`, respectivamente — ver
+[`02-arquitetura.md`](./02-arquitetura.md) para o detalhe de cada estado). Ela não
+processa os bits do Morse em si — só gera os resets e o `tradutor_enable` que
+orquestram os outros 5 componentes.
 
-O `Timer` mede, em ciclos de clock, por quanto tempo o botão `a` fica pressionado e
-informa ao `Conversor` se foi um traço ou um ponto através do sinal `flag_timer`
-(`'0'` = ponto, `'1'` = traço).
+## 1. Botão pressionado (`btn_a`)
 
-- A conversão de ciclos de clock para segundos é feita pelo generic `CLOCK_FREQ_HZ`
-  (frequência do clock da placa, em Hz), usado para calcular os limiares de cada
-  perfil em número de ciclos.
-- A entrada `profile` (2 bits) seleciona entre os **3 perfis fixos** (Iniciante /
-  Avançado / Expert) definidos em
-  [`04-decisoes-e-pendencias.md`](./04-decisoes-e-pendencias.md#perfis-de-velocidade-timer--proposta-em-discussão-2026-11-12) —
-  a forma final de seleção física (dip switches, por exemplo) ainda é uma pergunta em
-  aberto nesse mesmo documento.
-- Enquanto `a = '1'`, um contador interno incrementa a cada ciclo (saturando no maior
-  limiar, o do perfil Iniciante, para não estourar). A cada ciclo, `flag_timer` é
-  atualizado comparando o contador com o limiar do perfil selecionado. Quando o botão
-  é solto, o contador zera, mas `flag_timer` mantém o último valor calculado — que é
-  exatamente o valor que o `Conversor` lê na borda de descida.
+O usuário pressiona o botão `btn_a` por um tempo curto (ponto) ou longo (traço).
 
+## 2. Timer — ✅ implementado (sem perfis de velocidade)
 
-## 3. Conversor
+Arquivo: `Timer/Timer.vhd`. Testbench: `Timer/Timer_tb.vhd`.
 
-Arquivo: `maquina/datapath/Conversor/Conversor.vhd`. Testbench em
-`testbench/Conversor/tb_Conversor.vhd`.
+O `Timer` mede, em milissegundos, por quanto tempo o botão `btn_a` fica pressionado
+e expõe esse valor continuamente em `milissegundos` (um `integer`, não um sinal de 1
+bit). Ele **não decide** ponto/traço — isso ficou a cargo do `Conversor` (ver
+próxima seção). A conversão de ciclos de clock para milissegundos é feita pelo
+generic `clock_frequency` (`periodos_por_ms := clock_frequency / 1000`).
 
-Detecta a **borda de descida** do botão (`prev_a = '1' and a = '0'`, ou seja, quando o botão deixa de ser pressionado:
-- Ativa `load_assembler <= '1'` por um ciclo;
-- Propaga `result <= flag_timer` (o bit ponto/traço medido pelo Timer) — corrigido; antes
-  um `result <= '0';` incondicional no fim do processo sobrescrevia esse valor no mesmo
-  ciclo (ver [`04-decisoes-e-pendencias.md`](./04-decisoes-e-pendencias.md)).
+**Limitação:** o `Timer` atual não tem perfis de velocidade configuráveis — o
+limiar ponto/traço é decidido pelo `Conversor` (ver próxima seção), com um único
+par de limiares fixo.
 
+Enquanto `btn_a = '1'`, um contador de períodos de clock incrementa; a cada
+`periodos_por_ms` ciclos, `ms_count` é incrementado em 1. Quando o botão é
+pressionado de novo (borda de subida detectada via `btn_prev`), a contagem reinicia
+do zero — ou seja, `milissegundos` reflete a duração do toque **em andamento**,
+zerando a cada novo toque.
 
-## 4. Assembler 
+## 3. Conversor — ✅ implementado (decide ponto/traço)
 
-Arquivo: `maquina/datapath/Assembler/Assembler.vhd`. Testbench em
-`testbench/Assembler/tb_Assembler.vhd`.
+Arquivo: `Conversor/Conversor.vhd`. Testbench: `Conversor/Conversor_tb.vhd`.
 
-É um registrador de deslocamento: a cada pulso de `Load='1'`, desloca o bit `D` para
-dentro de um vetor de 6 bits (`Q <= data_in(4 downto 0) & D`). Isso acumula até 6
-símbolos Morse (pontos/traços) por caractere — o máximo usado no alfabeto Morse padrão.
+Detecta a **borda de descida** do botão (`btn_prev = '1' and btn_a = '0'`, ou seja, o
+momento em que o botão é solto) e, nesse instante, decide ponto/traço comparando
+`milissegundos` (vindo do `Timer`) contra dois limiares:
 
+- `milissegundos <= tempo_ponto` (generic, padrão 300) → `output <= '0'` (ponto);
+- `tempo_ponto < milissegundos <= tempo_traco` (constante interna, `tempo_ponto * 3`
+  = 900 por padrão) → `output <= '1'` (traço);
+- **Limitação:** `milissegundos > tempo_traco` → nenhuma ação — nem `output` nem
+  `load_assembler` são emitidos; o toque é descartado sem indicação de erro.
 
-## 5. O par `(valor, length)`
+Quando decide ponto ou traço, ativa `load_assembler <= '1'` por um ciclo, sinal que
+o `Assembler` usa para deslocar o novo bit para dentro do acumulador.
 
-Um tipo de dado composto ("record") com dois atributos:
-- `value`: o vetor de 6 bits;
-- `length`: quantas vezes o botão foi pressionado (quantos símbolos realmente fazem
-  parte do caractere, distinguindo zeros "reais" do Morse de zeros de preenchimento).
+## 4. Assembler — ✅ implementado (inclui `length` e zero-padding)
 
+Arquivo: `Assembler/Assembler.vhd`. Pacote: `Assembler/Assembler_pkg.vhd`. Testbench:
+`Assembler/Assembler_tb.vhd`.
 
-## 6. Tradutor — 
+É um registrador de deslocamento de 6 bits (`data_in <= data_in(4 downto 0) & D`),
+mas agora também resolve o que a documentação anterior apontava como pendência: o
+par `(value, length)`.
 
-Pasta `maquina/datapath/Tradutor/` tem apenas um placeholder. Pelo design descrito, deveria:
-- Receber `(value, length)`;
-- Decidir, com base nesses dois atributos, qual letra o padrão representa;
-- Enviar o código correspondente para o display.
+- A cada pulso de `load_a = '1'` (vindo do `Conversor`), desloca o bit `D` para
+  dentro de `data_in` e incrementa um contador interno (`counter`).
+- Se `counter` chega a 6 (máximo de símbolos Morse por caractere), fecha o
+  caractere automaticamente: copia `data_in` (já deslocado) para `Q.value`,
+  grava `Q.length <= 6`, e zera `data_in`/`counter` para o próximo caractere.
+- Se o botão `btn_b` for pressionado antes de completar 6 símbolos (borda de
+  subida, `btn_prev = '0' and btn_b = '1'`), fecha o caractere "cedo": copia
+  `data_in` para `Q.value`, grava `Q.length <= counter` (o número real de símbolos
+  digitados), e zera `data_in`/`counter`.
+- `Reset = '1'` zera `data_in`/`counter`, mas **não zera `Q`** — o último caractere
+  montado fica disponível em `Q` para o `Tradutor` ler, mesmo enquanto o
+  `Assembler` já está sendo resetado para o próximo caractere (ver nota sobre o
+  estado `s2` da Controladora em [`02-arquitetura.md`](./02-arquitetura.md)).
 
-## 7. Display — duas opções de hardware
+O tipo `morse_data` (`Assembler/Assembler_pkg.vhd`) é exatamente o record
+`(value, length)` que a documentação anterior descrevia como planejado:
+`value : std_logic_vector(5 downto 0)`, `length : integer range 0 to 6`.
 
-### 7a. 7 segmentos (`BCD_7seg`) — ✅ implementado
+## 5. Tradutor — ✅ implementado
 
-Arquivo: `maquina/datapath/BCD_7seg/BCD_7seg.vhd`. Testbench em
-`testbench/BCD_7seg/tb_BCD_7seg.vhd`, cobrindo as 36 combinações da tabela mais 2 fora
-dela (caminho `when others`).
+Arquivo: `Tradutor/Tradutor.vhd`. Testbench: `Tradutor/Tradutor_tb.vhd`.
 
-Recebe um vetor de 6 bits **ordinal** (não é o padrão Morse — é só uma contagem
-binária: `"000000"` a `"001001"` para os dígitos 0–9, `"001010"` em diante para as
-letras A–Z) e decodifica para o padrão de 7 segmentos correspondente.
+Recebe `Q` (o record `morse_data`) do `Assembler` e, quando `enable = '1'`
+(controlado pela Controladora), decodifica `(value, length)` para um código ordinal
+de 6 bits (`seven_seg_out`), usando `length` para escolher a tabela de combinações
+(letras com 1 a 4 símbolos, dígitos com 5 símbolos) e `value` para escolher a entrada
+dentro dessa tabela. Combinações não mapeadas (incluindo todo `length = 6`, que não é
+usado por nenhuma letra/dígito do alfabeto Morse padrão) caem em `"111111"`, que o
+`BCD_7seg` interpreta como `.` (ponto no display).
 
-Ou seja: este componente já resolve a etapa "letra → segmentos", mas depende do
-`Tradutor` (inexistente ainda) para transformar o padrão Morse em um desses códigos
-ordinais. Mostra só 1 caractere por vez, e algumas letras (M, W, X) não têm
-representação exata em 7 segmentos — o próprio arquivo já assume aproximações.
+Isso substitui o que a documentação anterior chamava de "pasta com apenas um
+placeholder" — o `Tradutor` está implementado e integrado.
 
-### 7b. LCD 16x2 —  (alternativa proposta)
+## 6. Display — `BCD_7seg` — ✅ implementado e integrado
 
-Um LCD 16x2 usa um controlador padrão HD44780, que exige:
-- Sinais de controle `RS` (registrador de dados/comando), `RW` (leitura/escrita) e `E`
-  (enable), além do barramento de dados (4 ou 8 bits);
-- Uma **sequência de inicialização** específica antes de aceitar qualquer caractere;
-- **Temporização entre escritas** (não é combinacional como o `BCD_7seg` — precisa de
-  uma máquina de estados própria).
+Arquivo: `BCD_7seg/BCD_7seg.vhd` (entidade `Bcd_7seg`). Testbench: não há um
+testbench próprio versionado atualmente para este componente (o antigo
+`testbench/BCD_7seg/tb_BCD_7seg.vhd`, que cobria as 36 combinações da tabela, foi
+removido junto com a árvore antiga — ver [`06-testbenches.md`](./06-testbenches.md)).
 
-Essa opção mostra texto real (várias letras em sequência, 2 linhas x 16 colunas) em vez de um caractere aproximado por vez, mas exige escrever um driver novo e bem mais
-complexo do que o `BCD_7seg` atual. Também muda o que o `Tradutor` precisa gerar: em vez do código ordinal de 6 bits usado pelo `BCD_7seg`, o `Tradutor` passaria a gerar o
-**código ASCII** (8 bits) da letra para esse novo driver.
+Recebe o vetor ordinal de 6 bits do `Tradutor` e decodifica para o padrão de 7
+segmentos: `"000000"`–`"001001"` para dígitos 0–9, `"001010"` em diante para letras
+A–Z. **Limitações:** várias letras (M, W, X) não têm representação exata em 7
+segmentos, então o componente usa aproximações; e o comentário no topo do arquivo
+cita pinagem testada para "Kit Terasic Altera DE2", diferente da placa alvo
+(MAX10M50F484C7G) declarada no README.
 
-## 8. Controladora 
+### Alternativa: LCD 16x2 — ainda não implementada
 
-Arquivo: `maquina/Controladora/Controladora.vhd`. Testbench em
-`testbench/Controladora/tb_Controladora.vhd`. Uma máquina de estados simples (`s0`..`s3`) pensada para orquestrar o datapath. O `case` de próximo estado já cobre os 4
-estados (`s2 → s3 → s0` foi adicionado só para fechar a sintaxe) e compila, mas é
-claramente um ponto de partida que ainda precisa ser retrabalhado antes de orquestrar
-os componentes reais — o papel de cada estado e dos sinais `a`/`b` no fluxo completo do
-datapath ainda não está definido.
+Sem mudanças em relação à versão anterior desta seção: um LCD 16x2 (controlador
+HD44780) mostraria texto real em vez de 1 caractere por vez, mas exige um driver
+novo — inicialização, temporização entre escritas, sinais `RS`/`RW`/`E` — que ainda
+não existe no repositório. Mudaria também o que o `Tradutor` precisa gerar (código
+ASCII de 8 bits em vez do ordinal de 6 bits usado pelo `BCD_7seg`).
 
-## Componente auxiliar: `RegW` / `RegistradorGenerico`
+## Testbench de integração: `tb_Sinalizador`
 
-Não faz parte dos 5 componentes citados, mas existe no repositório
-(`maquina/Reg_W/RegW.vhd`) como um registrador genérico parametrizável (`generic W : integer`),
-com reset assíncrono ativo em **alto** (`Reset = '1'`, padronizado com os demais módulos)
-e `Load` síncrono. Tem testbench
-(`testbench/Reg_W/tb_RegW.vhd`) cobrindo reset, carga e retenção. Ainda não é instanciado em nenhum
-outro componente — é um bloco reutilizável disponível para quando for necessário..
+Arquivo: `Sinalizador/tb_Sinalizador.vhd`. Diferente dos testbenches dos componentes
+individuais, este instancia o `Sinalizador` completo (topo do sistema) e simula uma
+sequência de toques lida de `Sinalizador/morse_input.txt` (formato: um caractere
+`a`/`b` + duração em ms por linha — `a` simula o botão A por aquela duração, `b`
+simula o botão B e grava o `disp_char` resultante em
+`Sinalizador/morse_output.txt`). É o mais próximo de um teste de ponta a ponta que o
+projeto tem hoje — mas, como os demais testbenches novos, não faz verificação
+automática (`assert`): grava a saída para comparação manual. Ver
+[`06-testbenches.md`](./06-testbenches.md).
