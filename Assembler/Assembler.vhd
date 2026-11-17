@@ -28,6 +28,8 @@ begin
         if (Reset = '1') then
             data_in <= (others => '0');
 				counter := 0;
+				load_prev <= '0';
+				btn_prev <= '0';
         elsif rising_edge(clock) then
             if (load_prev = '0' and load_a = '1') then
                counter := counter + 1;
