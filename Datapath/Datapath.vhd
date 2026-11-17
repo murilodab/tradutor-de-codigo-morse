@@ -7,6 +7,10 @@ use work.Assembler_pkg.all;
 
 entity Datapath is
 
+	generic(
+		clock_frequency : integer := 50000000
+	);
+
 	port(
 	-- inputs
 		clock		        : in std_logic;
@@ -16,7 +20,7 @@ entity Datapath is
 		tradutor_enable  : in std_logic;
 		btn_a 			  : in std_logic;
 		btn_b 			  : in std_logic;
-	-- outputs	
+	-- outputs
 		disp_char        : out std_logic_vector (6 downto 0);
 		btn_b_flag       : out std_logic
 		
@@ -44,7 +48,11 @@ architecture structural of Datapath is
 	sig_res_timer <= timer_reset;	
 
 	Timer : entity work.Timer
-	
+
+		generic map (
+		clock_frequency => clock_frequency
+		)
+
 		port map (
 		btn_a => btn_a,
 		reset => sig_res_timer,
