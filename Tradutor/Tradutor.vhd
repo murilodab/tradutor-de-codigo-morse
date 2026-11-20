@@ -11,7 +11,7 @@ entity Tradutor is
 		clock         : in std_logic;
 		morse_data_in : in morse_data;
 		enable        : in std_logic;
-		seven_seg_out : out std_logic_vector (5 downto 0)
+		seven_seg_out : out std_logic_vector (5 downto 0) := "111111"
 	);
 
 end entity;
@@ -86,9 +86,7 @@ begin
 				end case;
 			when others => seven_seg_out <= "111111"; -- .
 		end case;
-	    else
-	    	seven_seg_out <= "111111"; -- .
-	  end if;
+	    end if; -- quando enable = '0', mantem o ultimo caractere decodificado
 	end if;
 end process;
 
