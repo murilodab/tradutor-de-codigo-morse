@@ -36,16 +36,55 @@ architecture structural of Datapath is
 	signal sig_res_assemb : std_logic;
 	signal sig_e_trad : std_logic;
 	signal sig_btn_b : std_logic;
-	
+
+	-- Debounce de btn_a/btn_b: so aceita uma transicao depois que o sinal
+	-- ficar estavel por DEBOUNCE_CYCLES ciclos de clock seguidos (10 ms),
+	-- filtrando as bordas espurias de um toque fisico real no botao.
+	constant DEBOUNCE_CYCLES : integer := clock_frequency / 100; -- 10 ms
+	signal btn_a_deb : std_logic := '0';
+	signal btn_b_deb : std_logic := '0';
+	signal cnt_a : integer range 0 to DEBOUNCE_CYCLES := 0;
+	signal cnt_b : integer range 0 to DEBOUNCE_CYCLES := 0;
+
 	signal sig_ms_timer : integer;
 	signal sig_load_assembler : std_logic;
 	signal sig_output_conversor : std_logic;
 	signal sig_output_assembler : morse_data;
 	signal sig_trad_out : std_logic_vector (5 downto 0);
 
-	begin	
-		
-	sig_res_timer <= timer_reset;	
+	begin
+
+	-- Debounce por contador: zera o contador sempre que o sinal bruto muda
+	-- de novo antes de completar DEBOUNCE_CYCLES, e so propaga a transicao
+	-- para btn_*_deb quando o sinal passa esse tempo todo estavel.
+	process(clock)
+	begin
+		if rising_edge(clock) then
+			if btn_a /= btn_a_deb then
+				if cnt_a = DEBOUNCE_CYCLES then
+					btn_a_deb <= btn_a;
+					cnt_a <= 0;
+				else
+					cnt_a <= cnt_a + 1;
+				end if;
+			else
+				cnt_a <= 0;
+			end if;
+
+			if btn_b /= btn_b_deb then
+				if cnt_b = DEBOUNCE_CYCLES then
+					btn_b_deb <= btn_b;
+					cnt_b <= 0;
+				else
+					cnt_b <= cnt_b + 1;
+				end if;
+			else
+				cnt_b <= 0;
+			end if;
+		end if;
+	end process;
+
+	sig_res_timer <= timer_reset;
 
 	Timer : entity work.Timer
 
@@ -54,35 +93,35 @@ architecture structural of Datapath is
 		)
 
 		port map (
-		btn_a => btn_a,
+		btn_a => btn_a_deb,
 		reset => sig_res_timer,
 		milissegundos => sig_ms_timer,
 		clock => clock
 		);
-		
+
 		sig_res_conv <= conversor_reset; -- TODO
-		
+
 	Conversor : entity work.Conversor
-	 
+
 	 port map (
-	
+
 	 milissegundos => sig_ms_timer,
-	 btn_a => btn_a,
+	 btn_a => btn_a_deb,
 	 reset => sig_res_conv,
 	 load_assembler => sig_load_assembler,
 	 output => sig_output_conversor,
 	 clock => clock
 	);
-	
+
 	sig_res_assemb <= assembler_reset;
-	
+
 	Assembler : entity work.Assembler
-	
+
 	port map (
-	
+
 	D => sig_output_conversor,
 	load_a => sig_load_assembler,
-	btn_b => btn_b,
+	btn_b => btn_b_deb,
 	Q => sig_output_assembler,
 	reset => sig_res_assemb,
 	clock => clock
@@ -107,7 +146,7 @@ architecture structural of Datapath is
 	saida => disp_char
 	);
 	
-	sig_btn_b <= btn_b;
+	sig_btn_b <= btn_b_deb;
 	btn_b_flag <= sig_btn_b;
 
 end structural;
