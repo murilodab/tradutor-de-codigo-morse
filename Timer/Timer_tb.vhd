@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use std.textio.all;
 use std.env.all;
 
 entity Timer_tb is
@@ -20,6 +21,8 @@ architecture sim of Timer_tb is
     signal btn_a         : std_logic := '0';
     signal reset         : std_logic := '1';
     signal milissegundos : integer;
+
+    signal sim_done : boolean := false;
 
     -- Helper procedure to simulate a button press for a given duration
     procedure press_button (
@@ -51,16 +54,26 @@ begin
     -- Clock generator process
     clk_gen : process
     begin
-        while true loop
+        while not sim_done loop
             clock <= '0';
             wait for CLK_PERIOD / 2;
             clock <= '1';
             wait for CLK_PERIOD / 2;
         end loop;
+        wait;
     end process clk_gen;
 
-    -- Stimulus process
+    -- Le duracao_ms/esperado_ms de timer_input.txt (tabulado), aplica cada
+    -- duracao no btn_a, confere o milissegundos medido contra o esperado
+    -- (assert) e grava duracao/medido/resultado em timer_output.txt.
     stim_proc : process
+        file input_file     : text open read_mode  is "timer_input.txt";
+        file output_file    : text open write_mode is "timer_output.txt";
+        variable in_line     : line;
+        variable out_line    : line;
+        variable duracao_ms  : integer;
+        variable esperado_ms : integer;
+        variable ok1, ok2    : boolean;
     begin
         -- 1. Hold reset active for 5 clock cycles, then release
         reset <= '1';
@@ -69,28 +82,48 @@ begin
         reset <= '0';
         wait for 50 ms;
 
-        -- 2. Press for 100 ms, then wait 50 ms
-        report "Pressing button for 100 ms...";
-        press_button(btn_a, 100 ms, 50 ms);
-        report "Measured value after 100 ms press: " & integer'image(milissegundos) & " ms";
+        -- 2. Le cada linha (duracao_ms esperado_ms), pressiona o botao por
+        --    duracao_ms e confere o valor medido
+        while not endfile(input_file) loop
+            readline(input_file, in_line);
 
-        -- 3. Press for 200 ms, then wait 50 ms
-        report "Pressing button for 200 ms...";
-        press_button(btn_a, 200 ms, 50 ms);
-        report "Measured value after 200 ms press: " & integer'image(milissegundos) & " ms";
+            if in_line'length = 0 then
+                next;
+            end if;
 
-        -- 4. Press for 300 ms, then wait 50 ms
-        report "Pressing button for 300 ms...";
-        press_button(btn_a, 300 ms, 50 ms);
-        report "Measured value after 300 ms press: " & integer'image(milissegundos) & " ms";
+            read(in_line, duracao_ms, ok1);
+            read(in_line, esperado_ms, ok2);
 
-        -- 5. Press for 400 ms, then wait 50 ms
-        report "Pressing button for 400 ms...";
-        press_button(btn_a, 400 ms, 50 ms);
-        report "Measured value after 400 ms press: " & integer'image(milissegundos) & " ms";
+            if ok1 and ok2 then
+                report "Pressing button for " & integer'image(duracao_ms) & " ms...";
+                press_button(btn_a, duracao_ms * 1 ms, 50 ms);
+
+                assert milissegundos = esperado_ms
+                    report "Falha: duracao=" & integer'image(duracao_ms) &
+                           "ms esperado=" & integer'image(esperado_ms) &
+                           "ms medido=" & integer'image(milissegundos) & "ms"
+                    severity error;
+
+                write(out_line, duracao_ms);
+                write(out_line, string'(" "));
+                write(out_line, milissegundos);
+                write(out_line, string'(" "));
+                if milissegundos = esperado_ms then
+                    write(out_line, string'("OK"));
+                else
+                    write(out_line, string'("FALHOU"));
+                end if;
+                writeline(output_file, out_line);
+            end if;
+        end loop;
+
+        file_close(input_file);
+        file_close(output_file);
 
         -- End simulation cleanly (VHDL-2008)
-        report "Simulation complete.";
+        report "Simulation complete. Results saved to timer_output.txt.";
+        sim_done <= true;
+        wait for 1 ns;
         std.env.stop(0);
         wait;
     end process stim_proc;
