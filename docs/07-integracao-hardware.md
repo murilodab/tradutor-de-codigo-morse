@@ -1,15 +1,6 @@
-# Integração com hardware real — DE10-Lite + LCD 16x2 (HD44780)
-
-Este documento cobre o que falta além do código pra rodar o projeto numa placa
-DE10-Lite de verdade, com o display LCD 16x2 (HD44780 cru, sem adaptador
-serial/I2C) ligado via GPIO.
+# Integração com hardware
 
 ## 1. Compilação completa
-
-Até a sessão em que este documento foi escrito, só tinha sido validado
-**Analysis & Synthesis** (front-end). Rodamos o fluxo completo
-(`quartus_sh --flow compile`, que inclui Fitter + Timing Analyzer + Assembler)
-pro dispositivo real do DE10-Lite:
 
 - **Família**: MAX 10
 - **Dispositivo**: `10M50DAF484C7G`
@@ -40,10 +31,8 @@ antes de compilar pra gravar na placa.
 
 ## 2. Atribuição de pinos (Pin Planner)
 
-Você não vai usar o display de 7 segmentos do DE10-Lite, só o LCD externo via
-GPIO. Pinos necessários:
 
-| Sinal (porta de `Sinalizador`) | Função | Onde no DE10-Lite |
+| Porta do `Sinalizador`) | Função | FPGA |
 |---|---|---|
 | `clock` | Clock de 50MHz | `CLOCK_50` |
 | `reset` | Reset geral | Um dos `KEY[1:0]` (push-button onboard) |
@@ -51,7 +40,10 @@ GPIO. Pinos necessários:
 | `btn_b` | Botão de fim de símbolo | Switch ou botão externo |
 | `lcd_rs` | RS do LCD | 1 pino livre do header `GPIO_0` ou `GPIO_1` |
 | `lcd_e` | E do LCD | 1 pino livre do header `GPIO_0` ou `GPIO_1` |
-| `lcd_data(7:4)` | D4-D7 do LCD | 4 pinos livres do mesmo header |
+| `lcd_data(7)` | D7 do LCD | 1 pino livre do **mesmo** header escolhido acima |
+| `lcd_data(6)` | D6 do LCD | 1 pino livre do **mesmo** header escolhido acima |
+| `lcd_data(5)` | D5 do LCD | 1 pino livre do **mesmo** header escolhido acima |
+| `lcd_data(4)` | D4 do LCD | 1 pino livre do **mesmo** header escolhido acima |
 | `disp_char` | Não usado (sem 7 segmentos) | Deixar sem atribuir — porta fica sem pino, sem problema |
 
 **Atenção com os `KEY`/botões do DE10-Lite**: eles são **ativo-baixo**
@@ -91,51 +83,9 @@ Planner do Quartus.
 
 ### VO sem potenciômetro
 
-O potenciômetro existe pra ajustar o contraste manualmente, mas dá pra
-substituir por um valor fixo:
+- Backlight azul: VO direto no GND (contraste máximo).
+- Se precisar ajustar: resistor de 1kΩ entre VO e GND.
 
-- **Displays de backlight azul (o seu caso) costumam funcionar bem com VO
-  ligado direto no GND** (contraste máximo) — é a solução mais simples e o
-  "hack" mais comum pra esse tipo específico de display. Se o texto aparecer
-  bom demais escuro/borrado, é só trocar por um resistor pequeno em série (ver
-  abaixo).
-- Se precisar ajustar: um resistor fixo de **1kΩ entre VO e GND** é um ponto
-  de partida comum (gera um pouco de divisor de tensão com a impedância
-  interna do LCD). Se o texto não aparecer, teste valores menores (até
-  encostar em 0Ω/GND direto); se aparecer "sujo"/com segmentos fantasma, teste
-  valores maiores.
+## 4. Resistor de proteção em `lcd_e` (pull-down)
 
-Como é um ajuste que depende do lote específico do painel, não dá pra
-calcular um valor exato sem testar na placa — comece com GND direto.
-
-## 4. Nota sobre resistor de proteção em `lcd_e` (pull-down)
-
-Levantamos a dúvida sobre usar um **resistor de pull-up** nas linhas de dados
-pra resolver incompatibilidade de nível lógico (FPGA em 3.3V, HD44780
-tipicamente especificado pra 5V). Esclarecendo: **um pull-up não resolve
-isso** — `lcd_rs`/`lcd_e`/`lcd_data` são sinais **ativamente dirigidos** pela
-FPGA (push-pull, não open-drain), então um resistor de pull-up pra 5V só
-geraria disputa de corrente contra o driver da FPGA, sem elevar a tensão de
-saída real. Na prática, a maioria dos módulos HD44780 aceita 3.3V como nível
-alto válido mesmo com VDD em 5V (é a combinação mais comum em projetos com
-FPGA/Arduino 3.3V), mas isso não foi testado fisicamente aqui — se o display
-não responder, as alternativas reais são: alimentar o LCD em 3.3V em vez de
-5V (mais simples, funciona na maioria dos módulos, só com brilho/contraste
-reduzido), ou um level shifter de verdade (ex. `74LVC245`).
-
-**O resistor que de fato é útil aqui é um pull-down em `lcd_e`, não um
-pull-up** — e é uma proteção diferente, contra outro problema: durante a
-configuração da FPGA (power-on, antes do bitstream carregar), os pinos de
-I/O ficam em alta impedância (tri-state), flutuando. Se `lcd_e` flutuar
-nesse período, o HD44780 pode enxergar pulsos de `E` espúrios e latchear lixo
-aleatório do barramento de dados antes da FPGA sequer começar a rodar.
-
-- **Valor calculado**: um pull-down de **10kΩ entre `lcd_e` e GND** é o
-  padrão de mercado pra esse tipo de proteção (impedância alta o bastante pra
-  não atrapalhar quando a FPGA assume o controle ativamente do pino — a
-  corrente nesse ponto é desprezível, ~0.33mA com VDD=3.3V — mas baixa o
-  bastante pra manter o pino em nível baixo de forma confiável enquanto
-  estiver flutuando).
-- **Implementar só se precisar**: se você notar caracteres estranhos
-  aparecendo no display logo depois de ligar a placa (antes mesmo de apertar
-  qualquer botão), esse pull-down em `lcd_e` é o primeiro lugar pra olhar.
+Se aparecerem caracteres estranhos no display logo ao ligar a placa: pull-down de 10kΩ entre `lcd_e` e GND.
