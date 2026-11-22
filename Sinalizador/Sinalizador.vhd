@@ -15,8 +15,9 @@ generic (
 		btn_a    : in std_logic;
 		btn_b    : in std_logic;
 	-- outputs
-		disp_char     : out std_logic_vector (6 downto 0)
-		
+		disp_char     : out std_logic_vector (6 downto 0);
+		lcd_tx        : out std_logic
+
 	);
 
 end entity;
@@ -44,16 +45,18 @@ architecture structural of Sinalizador is
 		btn_a => btn_a,
 		btn_b => btn_b,
 		clock => clock,
-		
+		reset => reset,
+
 		timer_reset => sig_res_timer,
 		conversor_reset => sig_res_conv,
 		assembler_reset => sig_res_assemb,
 		tradutor_enable => sig_e_trad,
-		
+
 		btn_b_flag => sig_btn_b,
-		disp_char => disp_char
-		
-		
+		disp_char => disp_char,
+		lcd_tx => lcd_tx
+
+
 		);
 		
 	I_Controladora : entity work.Projeto_v10
