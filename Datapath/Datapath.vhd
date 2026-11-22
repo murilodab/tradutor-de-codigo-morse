@@ -14,7 +14,7 @@ entity Datapath is
 	port(
 	-- inputs
 		clock		        : in std_logic;
-		reset            : in std_logic; -- reset geral do sistema (usado so pelo Display_LCD/Uart_tx)
+		reset            : in std_logic; -- reset geral do sistema (usado so pelo Display_LCD)
 		timer_reset      : in std_logic;
 		conversor_reset  : in std_logic;
 		assembler_reset  : in std_logic;
@@ -24,7 +24,9 @@ entity Datapath is
 	-- outputs
 		disp_char        : out std_logic_vector (6 downto 0);
 		btn_b_flag       : out std_logic;
-		lcd_tx           : out std_logic
+		lcd_rs           : out std_logic;
+		lcd_e            : out std_logic;
+		lcd_data         : out std_logic_vector (7 downto 4)
 
 	);
 
@@ -153,11 +155,13 @@ architecture structural of Datapath is
 		clock_frequency => clock_frequency
 	)
 	port map (
-		clock   => clock,
-		reset   => reset,
-		enable  => sig_e_trad,
-		code_in => sig_trad_out,
-		tx      => lcd_tx
+		clock    => clock,
+		reset    => reset,
+		enable   => sig_e_trad,
+		code_in  => sig_trad_out,
+		lcd_rs   => lcd_rs,
+		lcd_e    => lcd_e,
+		lcd_data => lcd_data
 	);
 
 	sig_btn_b <= btn_b_deb;

@@ -16,7 +16,9 @@ generic (
 		btn_b    : in std_logic;
 	-- outputs
 		disp_char     : out std_logic_vector (6 downto 0);
-		lcd_tx        : out std_logic
+		lcd_rs        : out std_logic;
+		lcd_e         : out std_logic;
+		lcd_data      : out std_logic_vector (7 downto 4)
 
 	);
 
@@ -54,7 +56,9 @@ architecture structural of Sinalizador is
 
 		btn_b_flag => sig_btn_b,
 		disp_char => disp_char,
-		lcd_tx => lcd_tx
+		lcd_rs => lcd_rs,
+		lcd_e => lcd_e,
+		lcd_data => lcd_data
 
 
 		);
