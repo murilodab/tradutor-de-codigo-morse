@@ -1,6 +1,6 @@
 set_global_assignment -name FAMILY "MAX 10"
 set_global_assignment -name DEVICE 10M50DAF484C7G
-set_global_assignment -name TOP_LEVEL_ENTITY Sinalizador
+set_global_assignment -name TOP_LEVEL_ENTITY Sinalizador_DE10Lite
 set_global_assignment -name SDC_FILE tradutor_morse.sdc
 
 set_global_assignment -name VHDL_FILE Assembler/Assembler_pkg.vhd
@@ -13,12 +13,19 @@ set_global_assignment -name VHDL_FILE Display_LCD/Display_LCD.vhd
 set_global_assignment -name VHDL_FILE Datapath/Datapath.vhd
 set_global_assignment -name VHDL_FILE Controladora/Projeto_v10.vhd
 set_global_assignment -name VHDL_FILE Sinalizador/Sinalizador.vhd
+set_global_assignment -name VHDL_FILE Sinalizador/Sinalizador_DE10Lite.vhd
 
-# CLOCK_50 do DE10-Lite = PIN_P11 (confira contra a tabela oficial de pinos
-# da Terasic antes de gravar na placa de verdade). Os botoes KEY[1:0] e os 6
-# pinos de lcd_rs/lcd_e/lcd_data(7:4) ainda precisam ser escolhidos (qualquer
-# 6 pinos livres de GPIO_0 ou GPIO_1) e atribuidos aqui ou pelo Pin Planner -
-# ver docs/07-integracao-hardware.md.
+# CLOCK_50 e os push-buttons onboard KEY0/KEY1 do DE10-Lite, conforme o User
+# Manual oficial (Table 3-2 e Table 3-3). KEY0/KEY1 sao ativo-baixo (pull-up
+# + Schmitt trigger) - por isso o topo agora e Sinalizador_DE10Lite, que
+# inverte esses sinais antes de entrar no Sinalizador (ver
+# Sinalizador/Sinalizador_DE10Lite.vhd e docs/07-integracao-hardware.md).
+#
+# Ainda faltam: o pino de btn_a_n (botao externo, qualquer pino livre de
+# GPIO_0/GPIO_1) e os 6 pinos de lcd_rs/lcd_e/lcd_data(7:4) (mesmo header),
+# a atribuir aqui ou pelo Pin Planner.
 set_location_assignment PIN_P11 -to clock
+set_location_assignment PIN_B8 -to KEY0
+set_location_assignment PIN_A7 -to KEY1
 
 set_global_assignment -name LAST_QUARTUS_VERSION "25.1std.0 Lite Edition"
