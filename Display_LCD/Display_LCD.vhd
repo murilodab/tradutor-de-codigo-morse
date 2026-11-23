@@ -38,16 +38,35 @@ architecture rtl of Display_LCD is
 	-- "(7 downto 4)" direto na chamada.
 	subtype byte_t is std_logic_vector(7 downto 0);
 
-	constant ciclos_por_us : integer := clock_frequency / 1_000_000;
+	-- Converte um atraso em microssegundos pra ciclos de clock, multiplicando
+	-- antes de dividir (em vez de precalcular "ciclos por us" e truncar pra 0
+	-- sempre que clock_frequency < 1MHz, como testbenches costumam usar pra
+	-- simular mais rapido) e garantindo pelo menos 1 ciclo, pra nunca gerar
+	-- um atraso de 0 ciclos (que violaria o range 0 to CICLOS_POWER_ON dos
+	-- contadores abaixo e travaria a FSM).
+	function ciclos_do_atraso(us : integer) return integer is
+		-- Divide clock_frequency por 1000 antes de multiplicar por "us" (em
+		-- vez de multiplicar primeiro) pra nao estourar o range de 32 bits
+		-- do tipo integer (ex. 50_000_000 * 40_000 passa de 2^31-1) -
+		-- ainda preciso o bastante pra qualquer clock_frequency realista
+		-- deste projeto (kHz de testbench a dezenas de MHz de hardware).
+		constant bruto : integer := ((clock_frequency / 1000) * us) / 1000;
+	begin
+		if bruto < 1 then
+			return 1;
+		else
+			return bruto;
+		end if;
+	end function;
 
 	-- Atrasos (com folga generosa sobre o datasheet do HD44780), em
 	-- ciclos de clock:
-	constant CICLOS_POWER_ON   : integer := 40_000 * ciclos_por_us; -- >15ms min
-	constant CICLOS_INIT_1     : integer := 5_000  * ciclos_por_us; -- >4.1ms min
-	constant CICLOS_INIT_2     : integer := 150     * ciclos_por_us; -- >100us min
-	constant CICLOS_CMD        : integer := 50      * ciclos_por_us; -- >37-43us tipico
-	constant CICLOS_CLEAR      : integer := 2_000   * ciclos_por_us; -- >1.52ms min
-	constant CICLOS_E_PULSO    : integer := 2       * ciclos_por_us; -- >450ns min
+	constant CICLOS_POWER_ON   : integer := ciclos_do_atraso(40_000); -- >15ms min
+	constant CICLOS_INIT_1     : integer := ciclos_do_atraso(5_000);  -- >4.1ms min
+	constant CICLOS_INIT_2     : integer := ciclos_do_atraso(150);    -- >100us min
+	constant CICLOS_CMD        : integer := ciclos_do_atraso(50);     -- >37-43us tipico
+	constant CICLOS_CLEAR      : integer := ciclos_do_atraso(2_000);  -- >1.52ms min
+	constant CICLOS_E_PULSO    : integer := ciclos_do_atraso(2);      -- >450ns min
 
 	constant BYTE_FUNCTION_SET  : std_logic_vector(7 downto 0) := x"28"; -- 4 bits, 2 linhas, 5x8
 	constant BYTE_DISPLAY_CTRL  : std_logic_vector(7 downto 0) := x"0C"; -- display on, cursor/blink off
