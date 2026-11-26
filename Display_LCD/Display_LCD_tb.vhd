@@ -1,12 +1,12 @@
--- Testa o driver paralelo HD44780 (4 bits) capturando cada nibble que
+-- Testa o driver paralelo HD44780 (8 bits) capturando cada byte que
 -- ele manda pro barramento (lcd_rs + lcd_data, amostrados na borda de
 -- descida de lcd_e, que e quando o HD44780 de verdade latcheia o
 -- valor) e conferindo contra a sequencia esperada em
--- display_lcd_input.txt (formato "rs nibble_binario", 1 por linha): os
--- 12 nibbles da sequencia de inicializacao (resync 0x3 x3, 0x2,
--- function set, display control, entry mode, clear), seguidos de 2
--- nibbles por caractere decodificado (2 caracteres testados: 'U' e
--- 'F'). Grava "rs nibble_binario OK/FALHOU" em display_lcd_output.txt.
+-- display_lcd_input.txt (formato "rs byte_binario", 1 por linha): os
+-- 6 bytes da sequencia de inicializacao (function set x3, display
+-- control, entry mode, clear), seguidos de 1 byte por caractere
+-- decodificado (2 caracteres testados: 'U' e 'F'). Grava
+-- "rs byte_binario OK/FALHOU" em display_lcd_output.txt.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -28,7 +28,7 @@ architecture sim of Display_LCD_tb is
 	signal code_in  : std_logic_vector(5 downto 0) := (others => '0');
 	signal lcd_rs   : std_logic;
 	signal lcd_e    : std_logic;
-	signal lcd_data : std_logic_vector(7 downto 4);
+	signal lcd_data : std_logic_vector(7 downto 0);
 
 	signal sim_done : boolean := false;
 
@@ -77,19 +77,19 @@ begin
 		wait;
 	end process clk_gen;
 
-	-- Captura (rs, nibble) toda vez que lcd_e desce - e nesse instante
+	-- Captura (rs, byte) toda vez que lcd_e desce - e nesse instante
 	-- que um HD44780 de verdade latcheia o valor do barramento.
 	captura_proc : process
 		file input_file  : text open read_mode  is "display_lcd_input.txt";
 		file output_file : text open write_mode is "display_lcd_output.txt";
-		variable in_line     : line;
-		variable out_line    : line;
-		variable rs_esperado : integer;
-		variable nib_esperado : std_logic_vector(3 downto 0);
-		variable ok1, ok2     : boolean;
-		variable rs_capturado : std_logic;
-		variable nib_capturado : std_logic_vector(3 downto 0);
-		variable rs_ok, nib_ok : boolean;
+		variable in_line      : line;
+		variable out_line     : line;
+		variable rs_esperado  : integer;
+		variable byte_esperado : std_logic_vector(7 downto 0);
+		variable ok1, ok2      : boolean;
+		variable rs_capturado  : std_logic;
+		variable byte_capturado : std_logic_vector(7 downto 0);
+		variable rs_ok, byte_ok : boolean;
 	begin
 		while not endfile(input_file) loop
 			readline(input_file, in_line);
@@ -98,34 +98,34 @@ begin
 			end if;
 
 			read(in_line, rs_esperado, ok1);
-			read(in_line, nib_esperado, ok2);
+			read(in_line, byte_esperado, ok2);
 			if not (ok1 and ok2) then
 				next;
 			end if;
 
 			wait until falling_edge(lcd_e);
-			rs_capturado  := lcd_rs;
-			nib_capturado := lcd_data;
+			rs_capturado   := lcd_rs;
+			byte_capturado := lcd_data;
 
-			rs_ok  := (rs_esperado = 1 and rs_capturado = '1') or
-			          (rs_esperado = 0 and rs_capturado = '0');
-			nib_ok := (nib_capturado = nib_esperado);
+			rs_ok   := (rs_esperado = 1 and rs_capturado = '1') or
+			           (rs_esperado = 0 and rs_capturado = '0');
+			byte_ok := (byte_capturado = byte_esperado);
 
 			assert rs_ok
 				report "Falha (RS): esperado=" & integer'image(rs_esperado) &
 				       " capturado=" & std_logic'image(rs_capturado)
 				severity error;
 
-			assert nib_ok
-				report "Falha (nibble): esperado=" & slv_to_string(nib_esperado) &
-				       " capturado=" & slv_to_string(nib_capturado)
+			assert byte_ok
+				report "Falha (byte): esperado=" & slv_to_string(byte_esperado) &
+				       " capturado=" & slv_to_string(byte_capturado)
 				severity error;
 
 			write(out_line, rs_esperado);
 			write(out_line, string'(" "));
-			write(out_line, slv_to_string(nib_capturado));
+			write(out_line, slv_to_string(byte_capturado));
 			write(out_line, string'(" "));
-			if rs_ok and nib_ok then
+			if rs_ok and byte_ok then
 				write(out_line, string'("OK"));
 			else
 				write(out_line, string'("FALHOU"));
@@ -141,7 +141,7 @@ begin
 		wait;
 	end process captura_proc;
 
-	-- Depois da sequencia de inicializacao (12 nibbles), dispara 2
+	-- Depois da sequencia de inicializacao (6 bytes), dispara 2
 	-- caracteres decodificados: 'U' (codigo 011110) e 'F' (codigo
 	-- 001111), cada um esperando o anterior terminar antes de disparar.
 	stim_proc : process
@@ -151,7 +151,7 @@ begin
 		wait until rising_edge(clock);
 		reset <= '0';
 
-		wait until indice = 12;
+		wait until indice = 6;
 		wait for 2500 us; -- folga sobre CICLOS_CLEAR (2 ms) antes de aceitar enable
 
 		code_in <= "011110"; -- 'U'
@@ -160,7 +160,7 @@ begin
 		wait until rising_edge(clock);
 		enable <= '0';
 
-		wait until indice = 14;
+		wait until indice = 7;
 		wait for 100 us; -- folga sobre CICLOS_CMD (50 us) antes de aceitar enable
 
 		code_in <= "001111"; -- 'F'
@@ -169,7 +169,7 @@ begin
 		wait until rising_edge(clock);
 		enable <= '0';
 
-		wait until indice = 16;
+		wait until indice = 8;
 		wait for 100 us;
 
 		sim_done <= true;
