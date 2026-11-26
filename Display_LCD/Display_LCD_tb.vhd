@@ -11,6 +11,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use ieee.std_logic_textio.all;
 use std.textio.all;
 
 entity Display_LCD_tb is
@@ -30,6 +31,23 @@ architecture sim of Display_LCD_tb is
 	signal lcd_data : std_logic_vector(7 downto 4);
 
 	signal sim_done : boolean := false;
+
+	function slv_to_string(slv : std_logic_vector) return string is
+		variable res : string(1 to slv'length);
+		variable idx : integer := 1;
+	begin
+		for i in slv'range loop
+			if slv(i) = '1' then
+				res(idx) := '1';
+			elsif slv(i) = '0' then
+				res(idx) := '0';
+			else
+				res(idx) := 'X';
+			end if;
+			idx := idx + 1;
+		end loop;
+		return res;
+	end function;
 	signal indice   : integer := 0;
 
 begin
@@ -99,13 +117,13 @@ begin
 				severity error;
 
 			assert nib_ok
-				report "Falha (nibble): esperado=" & to_string(nib_esperado) &
-				       " capturado=" & to_string(nib_capturado)
+				report "Falha (nibble): esperado=" & slv_to_string(nib_esperado) &
+				       " capturado=" & slv_to_string(nib_capturado)
 				severity error;
 
 			write(out_line, rs_esperado);
 			write(out_line, string'(" "));
-			write(out_line, to_string(nib_capturado));
+			write(out_line, slv_to_string(nib_capturado));
 			write(out_line, string'(" "));
 			if rs_ok and nib_ok then
 				write(out_line, string'("OK"));
