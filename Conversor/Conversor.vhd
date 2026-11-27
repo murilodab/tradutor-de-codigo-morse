@@ -43,15 +43,14 @@ load_assembler <= load_a;
 				btn_prev <= '0';
 			else
 			if btn_prev = '1' and btn_a = '0' then -- botao foi solto
-				if milissegundos <= tempo_traco then
-					if milissegundos <= tempo_ponto then
-						output <= '0';
-					else
-						-- ate o momento o sinal eh 1 para qualquer valor maior ou igual traco_ponto. Sera alterado futuramente.
-						output <= '1';					
-					end if;
-					load_a <= '1'; 
+				if milissegundos <= tempo_ponto then
+					output <= '0';
+				else
+					-- qualquer toque mais longo que tempo_ponto (incluindo acima de
+					-- tempo_traco) vira traco, em vez de ser ignorado
+					output <= '1';
 				end if;
+				load_a <= '1';
 			end if;
 			btn_prev <= btn_a;
 			end if;

@@ -11,3 +11,14 @@
 !*.md
 !*.pdf
 !*.drawio
+!*.qpf
+!*.qsf
+!*.sdc
+
+# db/, incremental_db/ e output_files/ so guardam logs/lixo de build do
+# Quartus (regeneram a cada compilacao, nao tem .txt de input/output de
+# teste) - podem ficar de fora. NUNCA adicionar aqui um diretorio como
+# simulation/ que pode conter .txt de input/output real de testbench.
+**/db/
+**/incremental_db/
+**/output_files/

@@ -28,6 +28,8 @@ begin
         if (Reset = '1') then
             data_in <= (others => '0');
 				counter := 0;
+				load_prev <= '0';
+				btn_prev <= '0';
         elsif rising_edge(clock) then
             if (load_prev = '0' and load_a = '1') then
                counter := counter + 1;
@@ -40,10 +42,12 @@ begin
 						data_in <= data_in(4 downto 0) & D;
 					 end if;
 				elsif btn_prev = '0' and btn_b = '1' then
-					Q.value <= data_in;
-					Q.length <= counter;
-					data_in <= (others => '0');
-					counter := 0;
+					if counter > 0 then
+						Q.value <= data_in;
+						Q.length <= counter;
+						data_in <= (others => '0');
+						counter := 0;
+					end if;
 				end if;
 			load_prev <= load_a;
 			btn_prev <= btn_b;
