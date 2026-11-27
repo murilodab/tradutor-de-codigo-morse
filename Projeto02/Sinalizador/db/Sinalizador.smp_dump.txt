@@ -1,0 +1,38 @@
+
+State Machine - |Sinalizador|Projeto_v10:I_Controladora|state
+Name state.s2 state.s1 state.s0 
+state.s0 0 0 0 
+state.s1 0 1 1 
+state.s2 1 0 1 
+
+State Machine - |Sinalizador|Datapath:I_Datapath|Display_LCD:I_Display_LCD|estado_retorno
+Name estado_retorno.espera estado_retorno.envia_byte_e_baixo estado_retorno.envia_byte_e_alto estado_retorno.envia_byte_setup estado_retorno.caractere estado_retorno.pronto estado_retorno.clear estado_retorno.entry_mode estado_retorno.disp_ctrl estado_retorno.func_set estado_retorno.init_b estado_retorno.init_a estado_retorno.reset_wait 
+estado_retorno.reset_wait 0 0 0 0 0 0 0 0 0 0 0 0 0 
+estado_retorno.init_a 0 0 0 0 0 0 0 0 0 0 0 1 1 
+estado_retorno.init_b 0 0 0 0 0 0 0 0 0 0 1 0 1 
+estado_retorno.func_set 0 0 0 0 0 0 0 0 0 1 0 0 1 
+estado_retorno.disp_ctrl 0 0 0 0 0 0 0 0 1 0 0 0 1 
+estado_retorno.entry_mode 0 0 0 0 0 0 0 1 0 0 0 0 1 
+estado_retorno.clear 0 0 0 0 0 0 1 0 0 0 0 0 1 
+estado_retorno.pronto 0 0 0 0 0 1 0 0 0 0 0 0 1 
+estado_retorno.caractere 0 0 0 0 1 0 0 0 0 0 0 0 1 
+estado_retorno.envia_byte_setup 0 0 0 1 0 0 0 0 0 0 0 0 1 
+estado_retorno.envia_byte_e_alto 0 0 1 0 0 0 0 0 0 0 0 0 1 
+estado_retorno.envia_byte_e_baixo 0 1 0 0 0 0 0 0 0 0 0 0 1 
+estado_retorno.espera 1 0 0 0 0 0 0 0 0 0 0 0 1 
+
+State Machine - |Sinalizador|Datapath:I_Datapath|Display_LCD:I_Display_LCD|estado
+Name estado.espera estado.envia_byte_e_baixo estado.envia_byte_e_alto estado.envia_byte_setup estado.caractere estado.pronto estado.clear estado.entry_mode estado.disp_ctrl estado.func_set estado.init_b estado.init_a estado.reset_wait 
+estado.reset_wait 0 0 0 0 0 0 0 0 0 0 0 0 0 
+estado.init_a 0 0 0 0 0 0 0 0 0 0 0 1 1 
+estado.init_b 0 0 0 0 0 0 0 0 0 0 1 0 1 
+estado.func_set 0 0 0 0 0 0 0 0 0 1 0 0 1 
+estado.disp_ctrl 0 0 0 0 0 0 0 0 1 0 0 0 1 
+estado.entry_mode 0 0 0 0 0 0 0 1 0 0 0 0 1 
+estado.clear 0 0 0 0 0 0 1 0 0 0 0 0 1 
+estado.pronto 0 0 0 0 0 1 0 0 0 0 0 0 1 
+estado.caractere 0 0 0 0 1 0 0 0 0 0 0 0 1 
+estado.envia_byte_setup 0 0 0 1 0 0 0 0 0 0 0 0 1 
+estado.envia_byte_e_alto 0 0 1 0 0 0 0 0 0 0 0 0 1 
+estado.envia_byte_e_baixo 0 1 0 0 0 0 0 0 0 0 0 0 1 
+estado.espera 1 0 0 0 0 0 0 0 0 0 0 0 1 
